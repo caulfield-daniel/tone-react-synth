@@ -18,7 +18,7 @@ const KeyButton = styled.button`
 `;
 
 const BlackKeyButton = styled(KeyButton)`
-    width: 30px;
+    width: 29px;
     height: 120px;
     background-color: #303030;
     box-shadow: ${(props) =>

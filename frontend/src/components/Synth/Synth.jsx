@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import useSynth from '../../hooks/useSynth.jsx';
 import Keyboard from './Keyboard/Keyboard.jsx';
 import SynthControls from './SynthControls/SynthControls.jsx';
+import { getNoteFromKey } from '../../constants/keyboardLayout.js';
 
 const SynthContainer = styled.div`
     background: #424242;
@@ -30,12 +31,12 @@ export default function Synth() {
 
     const handleNoteOn = useCallback(
         (note) => {
-            if (!activeNotes.includes(note)) {
-                setActiveNotes((prev) => [...prev, note]);
-                playNote(note);
-            }
+            setActiveNotes((prev) =>
+                prev.includes(note) ? prev : [...prev, note]
+            );
+            playNote(note);
         },
-        [activeNotes, playNote]
+        [playNote]
     );
 
     const handleNoteOff = useCallback(
@@ -47,28 +48,13 @@ export default function Synth() {
     );
 
     useEffect(() => {
-        const keyToNote = {
-            a: 'C4',
-            w: 'C#4',
-            s: 'D4',
-            e: 'D#4',
-            d: 'E4',
-            f: 'F4',
-            t: 'F#4',
-            g: 'G4',
-            y: 'G#4',
-            h: 'A4',
-            u: 'A#4',
-            j: 'B4',
-        };
-
         const handleKeyDown = (e) => {
-            const note = keyToNote[e.key.toLowerCase()];
+            const note = getNoteFromKey(e.key);
             if (note) handleNoteOn(note);
         };
 
         const handleKeyUp = (e) => {
-            const note = keyToNote[e.key.toLowerCase()];
+            const note = getNoteFromKey(e.key);
             if (note) handleNoteOff(note);
         };
 

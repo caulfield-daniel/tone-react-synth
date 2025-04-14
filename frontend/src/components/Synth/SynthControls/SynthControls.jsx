@@ -3,14 +3,16 @@ import styled from 'styled-components';
 const ControlsContainer = styled.div`
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1.5rem;
+    grid-gap: 1.5rem;
     margin-bottom: 2rem;
+    padding: 1rem;
 `;
 
 const ControlGroup = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.1rem;
+    width: 100%;
 `;
 
 const Label = styled.label`
@@ -19,7 +21,7 @@ const Label = styled.label`
 `;
 
 const StyledInput = styled.input`
-    width: 100%;
+    width: 70%;
     cursor: pointer;
 `;
 
@@ -82,9 +84,7 @@ export default function SynthControls({ settings, onSettingsChange }) {
                     value={settings.reverb}
                     onChange={handleChange}
                 />
-            </ControlGroup>
 
-            <ControlGroup>
                 <Label>Chorus ({settings.chorus})</Label>
                 <StyledInput
                     type="range"
@@ -95,9 +95,6 @@ export default function SynthControls({ settings, onSettingsChange }) {
                     value={settings.chorus}
                     onChange={handleChange}
                 />
-            </ControlGroup>
-
-            <ControlGroup>
                 <Label>Distortion ({settings.distortion})</Label>
                 <StyledInput
                     type="range"
