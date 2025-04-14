@@ -3,80 +3,68 @@ import styled from 'styled-components';
 import { useState } from 'react';
 
 const Div = styled.div`
+    background-color: #000000;
     height: 200px;
     display: flex;
+    gap: 0.5px;
     flex-direction: row;
-    flex-wrap: wrap;
     justify-content: space-evenly;
     position: relative;
     user-select: none;
 `;
 
-export default function Keyboard() {
-    const [activeKeys, setActiveKeys] = useState({});
+export default function Keyboard({ activeNotes, onNoteOn, onNoteOff }) {
     const [isMouseDown, setIsMouseDown] = useState(false);
+    const [currentNote, setCurrentNote] = useState(null);
 
-    const handleMouseDown = (key) => {
+    const handleMouseDown = (note) => {
         setIsMouseDown(true);
-        setActiveKeys({ [key]: true });
+        setCurrentNote(note);
+        onNoteOn(note);
     };
 
-    const handleMouseEnter = (key) => {
-        if (isMouseDown) {
-            setActiveKeys({ [key]: true });
+    const handleMouseEnter = (note) => {
+        if (isMouseDown && note !== currentNote) {
+            if (currentNote) onNoteOff(currentNote);
+            setCurrentNote(note);
+            onNoteOn(note);
         }
-    };
-
-    const handleMouseUp = (key) => {
-        setIsMouseDown(false);
-        setActiveKeys({});
     };
 
     const handleGlobalMouseUp = () => {
         if (isMouseDown) {
             setIsMouseDown(false);
-            setActiveKeys({});
-        }
-    };
-
-    const handleGlobalMouseLeave = () => {
-        if (isMouseDown) {
-            setIsMouseDown(false);
-            setActiveKeys({});
+            if (currentNote) onNoteOff(currentNote);
+            setCurrentNote(null);
         }
     };
 
     const keys = [
-        { note: 'C' },
-        { note: 'C#' },
-        { note: 'D' },
-        { note: 'D#' },
-        { note: 'E' },
-        { note: 'F' },
-        { note: 'F#' },
-        { note: 'G' },
-        { note: 'G#' },
-        { note: 'A' },
-        { note: 'A#' },
-        { note: 'B' },
+        { note: 'C', key: 'a' },
+        { note: 'C#', key: 'w' },
+        { note: 'D', key: 's' },
+        { note: 'D#', key: 'e' },
+        { note: 'E', key: 'd' },
+        { note: 'F', key: 'f' },
+        { note: 'F#', key: 't' },
+        { note: 'G', key: 'g' },
+        { note: 'G#', key: 'y' },
+        { note: 'A', key: 'h' },
+        { note: 'A#', key: 'u' },
+        { note: 'B', key: 'j' },
     ];
 
     return (
-        <Div
-            onMouseLeave={handleGlobalMouseLeave}
-            onMouseUp={handleGlobalMouseUp}
-        >
+        <Div onMouseLeave={handleGlobalMouseUp} onMouseUp={handleGlobalMouseUp}>
             {keys.map((keyObj) => (
                 <Key
                     key={keyObj.note}
-                    onMouseDown={() => handleMouseDown(keyObj.note)}
-                    onMouseEnter={() => handleMouseEnter(keyObj.note)}
-                    onMouseUp={() => handleMouseUp(keyObj.note)}
-                    isActive={activeKeys[keyObj.note]}
+                    onMouseDown={() => handleMouseDown(keyObj.note + '4')}
+                    onMouseEnter={() => handleMouseEnter(keyObj.note + '4')}
+                    isActive={activeNotes.includes(keyObj.note + '4')}
                     isBlack={keyObj.note.endsWith('#')}
-                >
-                    &nbsp;
-                </Key>
+                    keyboardKey={keyObj.key}
+                ></Key>
             ))}
         </Div>
     );

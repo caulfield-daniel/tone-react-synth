@@ -1,6 +1,11 @@
 import styled from 'styled-components';
 
 const KeyButton = styled.button`
+    padding-top: 90px;
+    color: #9a9a9a;
+    font-size: ${(props) => (props.$isActive ? '20px' : '16px')};
+    outline: none;
+    border: none;
     width: 70px;
     background-color: white;
     transition: all 0.1s ease-in-out;
@@ -16,44 +21,44 @@ const BlackKeyButton = styled(KeyButton)`
     width: 30px;
     height: 120px;
     background-color: #303030;
-    border: none;
     box-shadow: ${(props) =>
         props.$isActive ? 'none' : '0 5px 3px 0 rgba(0, 0, 0, 1)'};
     z-index: 2;
-    margin: 0 -15px; /* Позиционирование над белыми клавишами */
+    margin: 0 -15px;
 `;
 
 export default function Key({
     onMouseDown,
     onMouseUp,
-    onMouseEnter, // Добавлен новый обработчик
+    onMouseEnter,
     onMouseLeave,
     isBlack,
     isActive,
+    keyboardKey,
 }) {
     return (
         <>
             {isBlack ? (
                 <BlackKeyButton
                     onMouseDown={onMouseDown}
-                    onMouseEnter={onMouseEnter} // Передаем обработчик
+                    onMouseEnter={onMouseEnter}
                     onMouseUp={onMouseUp}
                     onMouseLeave={onMouseLeave}
                     $isActive={isActive}
                     $isBlack={isBlack}
                 >
-                    &nbsp;
+                    {keyboardKey.toUpperCase()}
                 </BlackKeyButton>
             ) : (
                 <KeyButton
                     onMouseDown={onMouseDown}
-                    onMouseEnter={onMouseEnter} // Передаем обработчик
+                    onMouseEnter={onMouseEnter}
                     onMouseUp={onMouseUp}
                     onMouseLeave={onMouseLeave}
                     $isActive={isActive}
                     $isBlack={isBlack}
                 >
-                    &nbsp;
+                    {keyboardKey.toUpperCase()}
                 </KeyButton>
             )}
         </>
