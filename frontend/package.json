@@ -12,6 +12,7 @@
   "dependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-select": "^5.10.1",
     "reactronica": "^0.8.1-canary.0",
     "styled-components": "^6.1.17",
     "tone": "^15.0.4"
