@@ -1,31 +1,57 @@
 import React from 'react';
 import styled from 'styled-components';
 import Select from 'react-select';
+import {
+    PiWaveSawtooth,
+    PiWaveSine,
+    PiWaveSquare,
+    PiWaveTriangle,
+} from 'react-icons/pi';
 
-const WaveformIcon = styled.div`
+const WaveformIconContainer = styled.div`
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 8px;
-    img {
-        width: 30px;
-        height: 30px;
-        margin-right: 10px;
+    gap: 10px;
+    cursor: pointer;
+    svg {
+        font-size: 36px;
+        flex-shrink: 0;
     }
 `;
 
 const StyledSelect = styled(Select)`
-    width: 200px;
+    display: flex;
     font-size: 1rem;
     border-radius: 4px;
     border: 1px solid #666;
     background: #555;
     color: white;
     z-index: 10;
+    align-items: center;
+    justify-content: center;
 
     .react-select__control {
         background: #555;
         border: none;
         box-shadow: none;
+        width: 100%;
+        height: 100%;
+    }
+
+    .react-select__indicator-separator {
+        display: none;
+    }
+
+    .react-select__indicator {
+        display: none;
+    }
+
+    .react-select__value-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     .react-select__single-value {
@@ -36,40 +62,49 @@ const StyledSelect = styled(Select)`
         background: #555;
     }
 
-    .react-select__option {
-        &:hover {
-            background: #666;
-        }
+    .react-select__menu-list {
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 `;
 
-const waveformIcons = {
-    sine: '/icons/waveform-sine.png',
-    square: '/icons/waveform-square.png',
-    sawtooth: '/icons/waveform-sawtooth.png',
-    triangle: '/icons/waveform-triangle.png',
-};
+const options = [
+    {
+        value: 'sine',
+        label: 'sine',
+        icon: <PiWaveSine />,
+    },
+    {
+        value: 'square',
+        label: 'square',
+        icon: <PiWaveSquare />,
+    },
+    {
+        value: 'sawtooth',
+        label: 'sawtooth',
+        icon: <PiWaveSawtooth />,
+    },
+    {
+        value: 'triangle',
+        label: 'triangle',
+        icon: <PiWaveTriangle />,
+    },
+];
 
 const CustomOption = ({ innerProps, data }) => (
-    <WaveformIcon {...innerProps}>
-        <img src={data.icon} alt={data.label} />
-        {data.label}
-    </WaveformIcon>
+    <WaveformIconContainer {...innerProps}>
+        {data.icon}
+        {/* {data.label} */}
+    </WaveformIconContainer>
 );
 
 const CustomSingleValue = ({ data }) => (
-    <WaveformIcon>
-        <img src={data.icon} alt={data.label} />
-        {data.label}
-    </WaveformIcon>
+    <WaveformIconContainer>
+        {data.icon}
+        {/* {data.label} */}
+    </WaveformIconContainer>
 );
-
-const options = [
-    { value: 'sine', label: 'sine', icon: waveformIcons.sine },
-    { value: 'square', label: 'square', icon: waveformIcons.square },
-    { value: 'sawtooth', label: 'sawtooth', icon: waveformIcons.sawtooth },
-    { value: 'triangle', label: 'triangle', icon: waveformIcons.triangle },
-];
 
 export default function WaveformSelect({ value, onChange }) {
     return (

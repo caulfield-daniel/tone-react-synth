@@ -1,14 +1,23 @@
 import styled from 'styled-components';
 import WaveformSelect from './WaveformSelect';
 
+// const ControlsContainer = styled.div`
+//     display: grid;
+//     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+//     grid-gap: 1.5rem;
+//     margin-bottom: 2rem;
+//     padding: 1rem;
+//     border: 1px solid #666;
+// `;
+
 const ControlsContainer = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    grid-gap: 1.5rem;
-    margin-bottom: 2rem;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
     padding: 1rem;
+    margin-bottom: 2rem;
     border: 1px solid #666;
-`;
+`
 
 const ControlGroup = styled.div`
     display: flex;
