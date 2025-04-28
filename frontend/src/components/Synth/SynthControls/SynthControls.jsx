@@ -1,15 +1,6 @@
 import styled from 'styled-components';
 import WaveformSelect from './WaveformSelect';
 
-// const ControlsContainer = styled.div`
-//     display: grid;
-//     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-//     grid-gap: 1.5rem;
-//     margin-bottom: 2rem;
-//     padding: 1rem;
-//     border: 1px solid #666;
-// `;
-
 const ControlsContainer = styled.div`
     display: flex;
     flex-direction: row;
@@ -17,7 +8,7 @@ const ControlsContainer = styled.div`
     padding: 1rem;
     margin-bottom: 2rem;
     border: 1px solid #666;
-`
+`;
 
 const ControlGroup = styled.div`
     display: flex;
@@ -40,19 +31,24 @@ const StyledInput = styled.input.attrs({ type: 'range' })`
 `;
 
 export default function SynthControls({ settings, onSettingsChange }) {
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        onSettingsChange({
-            ...settings,
-            [name]: Number(value),
-        });
+    const handleNestedChange = (parent, child, value) => {
+        onSettingsChange((prev) => ({
+            ...prev,
+            [parent]: {
+                ...prev[parent],
+                [child]:
+                    typeof value === 'number'
+                        ? Number(value.toFixed(2))
+                        : value,
+            },
+        }));
     };
 
     const handleWaveformChange = (value) => {
-        onSettingsChange({
-            ...settings,
-            type: value,
-        });
+        onSettingsChange((prev) => ({
+            ...prev,
+            oscillator: value,
+        }));
     };
 
     return (
@@ -60,52 +56,72 @@ export default function SynthControls({ settings, onSettingsChange }) {
             <ControlGroup>
                 <Label>waveform</Label>
                 <WaveformSelect
-                    value={settings.type}
+                    value={settings.oscillator}
                     onChange={handleWaveformChange}
                 />
             </ControlGroup>
 
             <ControlGroup>
-                <Label>volume ({settings.volume}dB)</Label>
+                <Label>
+                    volume ({(((settings.volume + 60) / 60) * 100).toFixed()}%)
+                </Label>
+
                 <StyledInput
-                    name="volume"
-                    min="-40"
+                    min="-60"
                     max="0"
                     step="1"
                     value={settings.volume}
-                    onChange={handleInputChange}
+                    onChange={(e) =>
+                        onSettingsChange((prev) => ({
+                            ...prev,
+                            volume: Number(e.target.value),
+                        }))
+                    }
                 />
             </ControlGroup>
 
             <ControlGroup>
-                <Label>reverb ({settings.reverb})</Label>
+                <Label>distortion ({settings.effects.distortion})</Label>
                 <StyledInput
-                    name="reverb"
                     min="0"
                     max="1"
                     step="0.1"
-                    value={settings.reverb}
-                    onChange={handleInputChange}
+                    value={settings.effects.distortion}
+                    onChange={(e) =>
+                        handleNestedChange(
+                            'effects',
+                            'distortion',
+                            Number(e.target.value)
+                        )
+                    }
                 />
 
-                <Label>chorus ({settings.chorus})</Label>
+                <Label>chorus ({settings.effects.chorus.frequency})</Label>
                 <StyledInput
-                    name="chorus"
-                    min="0"
-                    max="1"
+                    min="0.1"
+                    max="10"
                     step="0.1"
-                    value={settings.chorus}
-                    onChange={handleInputChange}
+                    value={settings.effects.chorus.frequency}
+                    onChange={(e) =>
+                        handleNestedChange('effects', 'chorus', {
+                            ...settings.effects.chorus,
+                            frequency: Number(e.target.value),
+                        })
+                    }
                 />
 
-                <Label>distortion ({settings.distortion})</Label>
+                <Label>reverb ({settings.effects.reverb.decay})</Label>
                 <StyledInput
-                    name="distortion"
-                    min="0"
-                    max="1"
+                    min="0.1"
+                    max="10"
                     step="0.1"
-                    value={settings.distortion}
-                    onChange={handleInputChange}
+                    value={settings.effects.reverb.decay}
+                    onChange={(e) =>
+                        handleNestedChange('effects', 'reverb', {
+                            ...settings.effects.reverb,
+                            decay: Number(e.target.value),
+                        })
+                    }
                 />
             </ControlGroup>
         </ControlsContainer>

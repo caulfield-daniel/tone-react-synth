@@ -49,6 +49,7 @@ export default function Synth() {
 
     useEffect(() => {
         const handleKeyDown = (e) => {
+            if (e.repeat) return;
             const note = getNoteFromKey(e.key);
             if (note) handleNoteOn(note);
         };

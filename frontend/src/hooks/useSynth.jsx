@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import * as Tone from 'tone';
+import {
+    SYNTH_PARAMS,
+    SYNTH_ENVELOPE,
+    SYNTH_EFFECTS,
+} from '../config/synthConfiguration';
 
 const MIN_REVERB_DECAY = 0.01;
 
@@ -7,34 +12,28 @@ export default function useSynth() {
     const [synth, setSynth] = useState(null);
     const [effects, setEffects] = useState(null);
     const [settings, setSettings] = useState({
-        volume: -12,
-        type: 'sawtooth',
-        detune: 0,
-        reverb: 0.4,
-        chorus: 0.5,
-        distortion: 0.2,
+        ...SYNTH_PARAMS,
+        envelope: SYNTH_ENVELOPE,
+        effects: SYNTH_EFFECTS,
     });
 
     useEffect(() => {
         const newSynth = new Tone.PolySynth(Tone.Synth, {
-            oscillator: { type: settings.type },
-            envelope: {
-                attack: 0.01,
-                decay: 0.1,
-                sustain: 0.3,
-                release: 0.4,
-            },
-        });
+            oscillator: { type: settings.oscillator },
+            envelope: settings.envelope,
+        }).toDestination();
 
-        const initialReverb = Math.max(settings.reverb, MIN_REVERB_DECAY);
-        const distortion = new Tone.Distortion(settings.distortion);
+        const distortion = new Tone.Distortion(settings.effects.distortion);
         const chorus = new Tone.Chorus({
-            frequency: settings.chorus,
-            delayTime: 2.5,
-            depth: 0.5,
+            frequency: settings.effects.chorus.frequency,
+            depth: settings.effects.chorus.depth,
         });
-        const reverb = new Tone.Reverb(initialReverb);
+        const reverb = new Tone.Reverb({
+            wet: settings.effects.reverb.wet,
+            decay: Math.max(settings.effects.reverb.decay, MIN_REVERB_DECAY),
+        });
 
+        // Собираем цепочку эффектов
         newSynth.chain(distortion, chorus, reverb, Tone.getDestination());
 
         setSynth(newSynth);
@@ -46,27 +45,37 @@ export default function useSynth() {
             chorus.dispose();
             reverb.dispose();
         };
-    }, [settings.type, settings.chorus, settings.distortion, settings.reverb]);
+    }, [settings.oscillator, settings.envelope]);
 
     useEffect(() => {
-        synth?.set({
+        if (!synth) return;
+
+        synth.set({
             volume: settings.volume,
-            detune: settings.detune,
         });
-    }, [synth, settings.volume, settings.detune]);
+    }, [synth, settings.volume]);
 
     useEffect(() => {
         if (!effects) return;
 
-        effects.distortion.set({ distortion: settings.distortion });
-        effects.chorus.set({ frequency: settings.chorus });
-
-        const safeReverb = Math.max(settings.reverb, MIN_REVERB_DECAY);
-        effects.reverb.set({ decay: safeReverb });
-        
-    }, [effects, settings.distortion, settings.chorus, settings.reverb]);
+        effects.distortion.distortion = settings.effects.distortion;
+        effects.chorus.set({
+            frequency: settings.effects.chorus.frequency,
+            depth: settings.effects.chorus.depth,
+        });
+        effects.reverb.set({
+            wet: settings.effects.reverb.wet,
+            decay: Math.max(settings.effects.reverb.decay, MIN_REVERB_DECAY),
+        });
+    }, [
+        effects,
+        settings.effects.distortion,
+        settings.effects.chorus,
+        settings.effects.reverb,
+    ]);
 
     const playNote = useCallback((note) => synth?.triggerAttack(note), [synth]);
+
     const stopNote = useCallback(
         (note) => synth?.triggerRelease(note),
         [synth]
