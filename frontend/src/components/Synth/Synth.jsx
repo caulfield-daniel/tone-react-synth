@@ -30,8 +30,13 @@ const NoteIndicator = styled.div`
 `;
 
 export default function Synth() {
-    const { playNote, stopNote, settings, setSettings } = useSynth();
+    const { playNote, stopNote, settings, setSettings, loadPreset } =
+        useSynth();
     const [activeNotes, dispatch] = useReducer(activeNotesReducer, []);
+
+    useEffect(() => {
+        loadPreset('ambient');
+    }, [loadPreset]);
 
     const handleNoteOn = useCallback(
         (note) => {

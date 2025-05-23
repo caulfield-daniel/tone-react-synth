@@ -1,90 +1,136 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import * as Tone from 'tone';
-import {
-    SYNTH_PARAMS,
-    SYNTH_ENVELOPE,
-    SYNTH_EFFECTS,
-} from '../config/synthConfiguration';
-
-const MIN_REVERB_DECAY = 0.01;
+import { SYNTH_PRESETS } from '../config/synthPresets';
+import { MIN_REVERB_DECAY, MAX_POLYPHONY } from '../config/synthConfiguration';
 
 export default function useSynth() {
-    const [synth, setSynth] = useState(null);
-    const [effects, setEffects] = useState(null);
-    const [settings, setSettings] = useState({
-        ...SYNTH_PARAMS,
-        envelope: SYNTH_ENVELOPE,
-        effects: SYNTH_EFFECTS,
-    });
+    const [settings, setSettings] = useState(SYNTH_PRESETS.default);
+    const synthRef = useRef(null);
+    const effectsRef = useRef(null);
 
-    useEffect(() => {
-        const newSynth = new Tone.PolySynth(Tone.Synth, {
-            oscillator: { type: settings.oscillator },
-            envelope: settings.envelope,
-        }).toDestination();
+    // Инициализация синтезатора
+    const initializeSynth = useCallback(() => {
+        if (synthRef.current) return;
 
-        const distortion = new Tone.Distortion(settings.effects.distortion);
-        const chorus = new Tone.Chorus({
-            frequency: settings.effects.chorus.frequency,
-            depth: settings.effects.chorus.depth,
-        });
-        const reverb = new Tone.Reverb({
-            wet: settings.effects.reverb.wet,
-            decay: Math.max(settings.effects.reverb.decay, MIN_REVERB_DECAY),
-        });
+        try {
+            synthRef.current = new Tone.PolySynth({
+                maxPolyphony: MAX_POLYPHONY,
+                voice: Tone.Synth,
+                options: {
+                    oscillator: { type: settings.oscillator },
+                    envelope: settings.envelope,
+                },
+            }).toDestination();
 
-        // Собираем цепочку эффектов
-        newSynth.chain(distortion, chorus, reverb, Tone.getDestination());
+            // Инициализация эффектов
+            effectsRef.current = {
+                distortion: new Tone.Distortion(settings.effects.distortion),
+                chorus: new Tone.Chorus(settings.effects.chorus),
+                reverb: new Tone.Reverb({
+                    ...settings.effects.reverb,
+                    decay: Math.max(
+                        settings.effects.reverb.decay,
+                        MIN_REVERB_DECAY
+                    ),
+                }),
+            };
 
-        setSynth(newSynth);
-        setEffects({ distortion, chorus, reverb });
-
-        return () => {
-            newSynth.dispose();
-            distortion.dispose();
-            chorus.dispose();
-            reverb.dispose();
-        };
+            // Подключение цепочки эффектов
+            synthRef.current.chain(
+                effectsRef.current.distortion,
+                effectsRef.current.chorus,
+                effectsRef.current.reverb,
+                Tone.Destination
+            );
+        } catch (error) {
+            console.error('Ошибка инициализации:', error);
+        }
     }, [settings.oscillator, settings.envelope]);
 
+    // Обновление громкости
     useEffect(() => {
-        if (!synth) return;
+        if (synthRef.current && !synthRef.current.disposed) {
+            synthRef.current.set({ volume: settings.volume });
+        }
+    }, [settings.volume]);
 
-        synth.set({
-            volume: settings.volume,
-        });
-    }, [synth, settings.volume]);
+    // Обновление эффектов
+    const updateEffects = useCallback(() => {
+        if (!effectsRef.current) return;
 
+        try {
+            effectsRef.current.distortion.distortion =
+                settings.effects.distortion;
+            effectsRef.current.chorus.set(settings.effects.chorus);
+            effectsRef.current.reverb.set({
+                ...settings.effects.reverb,
+                decay: Math.max(
+                    settings.effects.reverb.decay,
+                    MIN_REVERB_DECAY
+                ),
+            });
+        } catch (error) {
+            console.error('Ошибка обновления эффектов:', error);
+        }
+    }, [settings.effects]);
+
+    // Инициализация и очистка
     useEffect(() => {
-        if (!effects) return;
+        initializeSynth();
+        updateEffects();
 
-        effects.distortion.distortion = settings.effects.distortion;
-        effects.chorus.set({
-            frequency: settings.effects.chorus.frequency,
-            depth: settings.effects.chorus.depth,
+        return () => {
+            if (synthRef.current && !synthRef.current.disposed) {
+                synthRef.current.dispose();
+                synthRef.current = null;
+            }
+            Object.values(effectsRef.current || {}).forEach((effect) => {
+                if (effect && !effect.disposed) effect.dispose();
+            });
+            effectsRef.current = null;
+        };
+    }, [initializeSynth, updateEffects]);
+
+    // Загрузка пресета
+    const loadPreset = useCallback((presetName) => {
+        const preset = SYNTH_PRESETS[presetName];
+        if (!preset) return;
+
+        setSettings({
+            oscillator: preset.oscillator,
+            envelope: preset.envelope,
+            effects: preset.effects,
+            volume: preset.volume,
         });
-        effects.reverb.set({
-            wet: settings.effects.reverb.wet,
-            decay: Math.max(settings.effects.reverb.decay, MIN_REVERB_DECAY),
-        });
-    }, [
-        effects,
-        settings.effects.distortion,
-        settings.effects.chorus,
-        settings.effects.reverb,
-    ]);
+    }, []);
 
-    const playNote = useCallback((note) => synth?.triggerAttack(note), [synth]);
+    // Воспроизведение ноты
+    const playNote = useCallback((note) => {
+        try {
+            if (synthRef.current && !synthRef.current.disposed) {
+                synthRef.current.triggerAttack(note);
+            }
+        } catch (error) {
+            console.error('Ошибка воспроизведения:', error);
+        }
+    }, []);
 
-    const stopNote = useCallback(
-        (note) => synth?.triggerRelease(note),
-        [synth]
-    );
+    // Остановка ноты
+    const stopNote = useCallback((note) => {
+        try {
+            if (synthRef.current && !synthRef.current.disposed) {
+                synthRef.current.triggerRelease(note);
+            }
+        } catch (error) {
+            console.error('Ошибка остановки:', error);
+        }
+    }, []);
 
     return {
         playNote,
         stopNote,
         settings,
         setSettings,
+        loadPreset,
     };
 }
