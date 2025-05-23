@@ -14,7 +14,11 @@ const WaveformIconContainer = styled.div`
     justify-content: center;
     padding: 8px;
     gap: 10px;
-    cursor: pointer;
+    transition: background-color 0.1s ease-in-out;
+
+    &:hover {
+        background-color: #666;
+    }
     svg {
         font-size: 36px;
         flex-shrink: 0;
@@ -38,6 +42,7 @@ const StyledSelect = styled(Select)`
         box-shadow: none;
         width: 100%;
         height: 100%;
+        cursor: pointer;
     }
 
     .react-select__indicator-separator {
@@ -52,6 +57,11 @@ const StyledSelect = styled(Select)`
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: background-color 0.1s ease-in-out;
+    }
+
+    .react-select__value-container:hover {
+        background-color: #666;
     }
 
     .react-select__single-value {
@@ -59,7 +69,8 @@ const StyledSelect = styled(Select)`
     }
 
     .react-select__menu {
-        background: #555;
+        background: #55555577;
+        cursor: pointer;
     }
 
     .react-select__menu-list {

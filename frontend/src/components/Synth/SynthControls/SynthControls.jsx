@@ -22,6 +22,7 @@ const Label = styled.label`
     font-size: 0.8rem;
     text-align: left;
     margin: 0.2rem;
+    user-select: none;
 `;
 
 const StyledInput = styled.input.attrs({ type: 'range' })`

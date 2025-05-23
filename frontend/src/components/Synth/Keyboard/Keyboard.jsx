@@ -16,27 +16,29 @@ const Div = styled.div`
 
 export default function Keyboard({ activeNotes, onNoteOn, onNoteOff }) {
     const [isMouseDown, setIsMouseDown] = useState(false);
-    const [currentNote, setCurrentNote] = useState(null);
+    const [keyboardActiveNotes, setKeyboardActiveNotes] = useState([]);
 
     const handleMouseDown = (fullNote) => {
         setIsMouseDown(true);
-        setCurrentNote(fullNote);
+        setKeyboardActiveNotes([fullNote]);
         onNoteOn(fullNote);
     };
 
     const handleMouseEnter = (fullNote) => {
-        if (isMouseDown && fullNote !== currentNote) {
-            if (currentNote) onNoteOff(currentNote);
-            setCurrentNote(fullNote);
+        if (isMouseDown && !keyboardActiveNotes.includes(fullNote)) {
+            // Остановить предыдущие ноты и запустить новую
+            keyboardActiveNotes.forEach((note) => onNoteOff(note));
+            setKeyboardActiveNotes([fullNote]);
             onNoteOn(fullNote);
         }
     };
 
     const handleGlobalMouseUp = () => {
         if (isMouseDown) {
+            // Остановить все активные ноты
+            keyboardActiveNotes.forEach((note) => onNoteOff(note));
+            setKeyboardActiveNotes([]);
             setIsMouseDown(false);
-            if (currentNote) onNoteOff(currentNote);
-            setCurrentNote(null);
         }
     };
 
