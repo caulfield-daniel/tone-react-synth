@@ -1,9 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useReducer, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import useSynth from '../../hooks/useSynth.jsx';
 import Keyboard from './Keyboard/Keyboard.jsx';
 import SynthControls from './SynthControls/SynthControls.jsx';
 import { getNoteFromKey } from '../../constants/keyboardLayout.js';
+import {
+    ACTIONS,
+    activeNotesReducer,
+} from '../../reducers/activeNotesReducer.js';
 
 const SynthContainer = styled.div`
     background: #424242;
@@ -27,25 +31,31 @@ const NoteIndicator = styled.div`
 
 export default function Synth() {
     const { playNote, stopNote, settings, setSettings } = useSynth();
-    const [activeNotes, setActiveNotes] = useState([]);
+    const [activeNotes, dispatch] = useReducer(activeNotesReducer, []);
 
     const handleNoteOn = useCallback(
         (note) => {
-            setActiveNotes((prev) =>
-                prev.includes(note) ? prev : [...prev, note]
-            );
-            playNote(note);
+            // Если нота уже активна, не запускаем её снова
+            if (!activeNotes.includes(note)) {
+                dispatch({ type: ACTIONS.ADD_NOTE, payload: note });
+                playNote(note);
+            }
         },
-        [playNote]
+        [activeNotes, playNote]
     );
 
     const handleNoteOff = useCallback(
         (note) => {
-            setActiveNotes((prev) => prev.filter((n) => n !== note));
+            dispatch({ type: ACTIONS.REMOVE_NOTE, payload: note });
             stopNote(note);
         },
         [stopNote]
     );
+
+    const handleClearNotes = useCallback(() => {
+        activeNotes.forEach((note) => stopNote(note));
+        dispatch({ type: ACTIONS.CLEAR_NOTES });
+    }, [activeNotes, stopNote]);
 
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -56,7 +66,9 @@ export default function Synth() {
 
         const handleKeyUp = (e) => {
             const note = getNoteFromKey(e.key);
-            if (note) handleNoteOff(note);
+            if (note) {
+                handleNoteOff(note);
+            }
         };
 
         window.addEventListener('keydown', handleKeyDown);
@@ -80,6 +92,7 @@ export default function Synth() {
                 onNoteOn={handleNoteOn}
                 onNoteOff={handleNoteOff}
                 activeNotes={activeNotes}
+                onClearNotes={handleClearNotes}
             />
         </SynthContainer>
     );

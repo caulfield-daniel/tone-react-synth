@@ -14,31 +14,37 @@ const Div = styled.div`
     user-select: none;
 `;
 
-export default function Keyboard({ activeNotes, onNoteOn, onNoteOff }) {
+export default function Keyboard({
+    activeNotes,
+    onNoteOn,
+    onNoteOff,
+    onClearNotes,
+}) {
     const [isMouseDown, setIsMouseDown] = useState(false);
-    const [keyboardActiveNotes, setKeyboardActiveNotes] = useState([]);
+    const [currentNote, setCurrentNote] = useState(null);
 
     const handleMouseDown = (fullNote) => {
         setIsMouseDown(true);
-        setKeyboardActiveNotes([fullNote]);
+        setCurrentNote(fullNote);
         onNoteOn(fullNote);
     };
 
     const handleMouseEnter = (fullNote) => {
-        if (isMouseDown && !keyboardActiveNotes.includes(fullNote)) {
-            // Остановить предыдущие ноты и запустить новую
-            keyboardActiveNotes.forEach((note) => onNoteOff(note));
-            setKeyboardActiveNotes([fullNote]);
+        if (isMouseDown && fullNote !== currentNote) {
+            // Остановить предыдущую ноту
+            if (currentNote) onNoteOff(currentNote);
+            // Запустить новую
+            setCurrentNote(fullNote);
             onNoteOn(fullNote);
         }
     };
 
     const handleGlobalMouseUp = () => {
         if (isMouseDown) {
-            // Остановить все активные ноты
-            keyboardActiveNotes.forEach((note) => onNoteOff(note));
-            setKeyboardActiveNotes([]);
+            // Остановить все ноты при отпускании мыши
+            onClearNotes();
             setIsMouseDown(false);
+            setCurrentNote(null);
         }
     };
 
