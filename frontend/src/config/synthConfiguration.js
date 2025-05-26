@@ -7,6 +7,5 @@ export const DEFAULT_PARAMS = {
 };
 
 export const DEFAULT_LIMITER = {
-    threshold: -6,
-    release: 0.1,
+    threshold: -15,
 };
