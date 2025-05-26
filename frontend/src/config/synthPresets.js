@@ -1,7 +1,7 @@
 export const SYNTH_PRESETS = {
     default: {
         oscillator: 'sawtooth',
-        volume: -12,
+        volume: -17,
         envelope: {
             attack: 0.01,
             decay: 0.2,
@@ -9,14 +9,14 @@ export const SYNTH_PRESETS = {
             release: 0.2,
         },
         effects: {
-            distortion: 0.2,
+            distortion: 0,
             chorus: { frequency: 1.5, depth: 0.5 },
             reverb: { wet: 0.4, decay: 2.0 },
         },
     },
     ambient: {
         oscillator: 'sine',
-        volume: -6,
+        volume: -17,
         envelope: {
             attack: 0.5,
             decay: 1.0,
@@ -24,9 +24,9 @@ export const SYNTH_PRESETS = {
             release: 2.0,
         },
         effects: {
-            distortion: 0.1,
+            distortion: 0,
             chorus: { frequency: 0.8, depth: 0.3 },
-            reverb: { wet: 0.6, decay: 5.0 },
+            reverb: { wet: 0.6, decay: 7.0 },
         },
     },
 };

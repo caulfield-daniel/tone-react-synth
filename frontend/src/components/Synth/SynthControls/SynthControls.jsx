@@ -64,12 +64,12 @@ export default function SynthControls({ settings, onSettingsChange }) {
 
             <ControlGroup>
                 <Label>
-                    volume ({(((settings.volume + 60) / 60) * 100).toFixed()}%)
+                    volume ({(((settings.volume + 40) / 34) * 100).toFixed()}%)
                 </Label>
 
                 <StyledInput
-                    min="-60"
-                    max="0"
+                    min="-40"
+                    max="-6"
                     step="1"
                     value={settings.volume}
                     onChange={(e) =>

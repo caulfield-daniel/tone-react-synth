@@ -35,12 +35,11 @@ export default function Synth() {
     const [activeNotes, dispatch] = useReducer(activeNotesReducer, []);
 
     useEffect(() => {
-        loadPreset('ambient');
-    }, [loadPreset]);
+        loadPreset('default');
+    }, []);
 
     const handleNoteOn = useCallback(
         (note) => {
-            // Если нота уже активна, не запускаем её снова
             if (!activeNotes.includes(note)) {
                 dispatch({ type: ACTIONS.ADD_NOTE, payload: note });
                 playNote(note);
