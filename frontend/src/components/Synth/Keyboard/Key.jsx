@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import React from 'react';
 
 const KeyButton = styled.button`
     padding-top: 90px;
@@ -27,7 +28,7 @@ const BlackKeyButton = styled(KeyButton)`
     margin: 0 -15px;
 `;
 
-export default function Key({
+function Key({
     onMouseDown,
     onMouseUp,
     onMouseEnter,
@@ -64,3 +65,5 @@ export default function Key({
         </>
     );
 }
+
+export default React.memo(Key);

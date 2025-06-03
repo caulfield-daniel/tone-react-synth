@@ -1,16 +1,16 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import * as Tone from 'tone';
 import { SYNTH_PRESETS } from '../config/synthPresets';
-import {
-    MIN_REVERB_DECAY,
-    MAX_POLYPHONY,
-    DEFAULT_LIMITER,
-} from '../config/synthConfiguration';
+import { MIN_REVERB_DECAY, MAX_POLYPHONY } from '../config/synthConfiguration';
+import { createEffects } from '../utils/synthUtils';
 
 export default function useSynth() {
     const [settings, setSettings] = useState(SYNTH_PRESETS.default);
     const synthRef = useRef(null);
     const effectsRef = useRef(null);
+
+    const isSynthAvailable = () =>
+        synthRef.current && !synthRef.current.disposed;
 
     // Инициализация синтезатора и эффектов
     const initializeSynth = useCallback(() => {
@@ -31,18 +31,7 @@ export default function useSynth() {
             });
 
             // 2. Инициализируем эффекты
-            effectsRef.current = {
-                distortion: new Tone.Distortion(settings.effects.distortion),
-                chorus: new Tone.Chorus(settings.effects.chorus),
-                reverb: new Tone.Reverb({
-                    ...settings.effects.reverb,
-                    decay: Math.max(
-                        settings.effects.reverb.decay,
-                        MIN_REVERB_DECAY
-                    ),
-                }),
-                limiter: new Tone.Limiter(DEFAULT_LIMITER),
-            };
+            effectsRef.current = createEffects(settings);
 
             // 3. Собираем цепочку обработки
             synthRef.current.chain(
@@ -63,7 +52,7 @@ export default function useSynth() {
     // Обновление параметров
 
     useEffect(() => {
-        if (synthRef.current && !synthRef.current.disposed) {
+        if (isSynthAvailable()) {
             synthRef.current.set({ volume: settings.volume });
         }
     }, [settings.volume]);
@@ -95,7 +84,7 @@ export default function useSynth() {
 
         return () => {
             try {
-                if (synthRef.current && !synthRef.current.disposed) {
+                if (isSynthAvailable()) {
                     synthRef.current.dispose();
                     synthRef.current = null;
                 }
@@ -123,7 +112,7 @@ export default function useSynth() {
 
     const playNote = useCallback((note) => {
         try {
-            if (synthRef.current && !synthRef.current.disposed) {
+            if (isSynthAvailable()) {
                 synthRef.current.triggerAttack(note, Tone.now());
             }
         } catch (error) {
@@ -133,7 +122,7 @@ export default function useSynth() {
 
     const stopNote = useCallback((note) => {
         try {
-            if (synthRef.current && !synthRef.current.disposed) {
+            if (isSynthAvailable()) {
                 synthRef.current.triggerRelease(note, Tone.now());
             }
         } catch (error) {

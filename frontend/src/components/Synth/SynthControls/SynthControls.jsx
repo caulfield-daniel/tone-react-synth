@@ -1,5 +1,7 @@
 import styled from 'styled-components';
 import WaveformSelect from './WaveformSelect';
+import { dbToPercent } from '../../../utils/volumeUtils';
+import { MAX_VOLUME, MIN_VOLUME } from '../../../config/synthConfiguration';
 
 const ControlsContainer = styled.div`
     display: flex;
@@ -63,13 +65,11 @@ export default function SynthControls({ settings, onSettingsChange }) {
             </ControlGroup>
 
             <ControlGroup>
-                <Label>
-                    volume ({(((settings.volume + 40) / 34) * 100).toFixed()}%)
-                </Label>
+                <Label>volume ({dbToPercent(settings.volume)}%)</Label>
 
                 <StyledInput
-                    min="-40"
-                    max="-6"
+                    min={MIN_VOLUME}
+                    max={MAX_VOLUME}
                     step="1"
                     value={settings.volume}
                     onChange={(e) =>

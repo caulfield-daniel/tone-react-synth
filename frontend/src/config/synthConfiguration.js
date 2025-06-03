@@ -1,5 +1,7 @@
 export const MIN_REVERB_DECAY = 0.01;
 export const MAX_POLYPHONY = 16;
+export const MIN_VOLUME = -40;
+export const MAX_VOLUME = -8;
 
 export const DEFAULT_PARAMS = {
     volume: -20,
@@ -7,5 +9,5 @@ export const DEFAULT_PARAMS = {
 };
 
 export const DEFAULT_LIMITER = {
-    threshold: -15,
+    threshold: -6,
 };
