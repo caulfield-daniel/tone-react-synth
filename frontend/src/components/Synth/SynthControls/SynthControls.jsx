@@ -1,37 +1,12 @@
-import styled from 'styled-components';
+import {
+    ControlsContainer,
+    ControlGroup,
+    Label,
+    StyledInput,
+} from './SynthControls.style';
 import WaveformSelect from './WaveformSelect';
 import { dbToPercent } from '../../../utils/volumeUtils';
 import { MAX_VOLUME, MIN_VOLUME } from '../../../config/synthConfiguration';
-
-const ControlsContainer = styled.div`
-    display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
-    padding: 1rem;
-    margin-bottom: 2rem;
-    border: 1px solid #666;
-`;
-
-const ControlGroup = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 0.1rem;
-    width: 100%;
-`;
-
-const Label = styled.label`
-    color: #c8c8c8;
-    font-size: 0.8rem;
-    text-align: left;
-    margin: 0.2rem;
-    user-select: none;
-`;
-
-const StyledInput = styled.input.attrs({ type: 'range' })`
-    width: 100%;
-    height: 5px;
-    cursor: pointer;
-`;
 
 export default function SynthControls({ settings, onSettingsChange }) {
     const handleNestedChange = (parent, child, value) => {

@@ -1,18 +1,7 @@
 import Key from './Key.jsx';
-import styled from 'styled-components';
+import { KeyboardContainer } from './Keyboard.style';
 import { useState } from 'react';
 import { KEYBOARD_LAYOUT } from '../../../constants/keyboardLayout.js';
-
-const Div = styled.div`
-    background-color: #636363;
-    height: 200px;
-    display: flex;
-    gap: 0.08rem;
-    flex-direction: row;
-    justify-content: space-between;
-    position: relative;
-    user-select: none;
-`;
 
 export default function Keyboard({
     activeNotes,
@@ -49,7 +38,10 @@ export default function Keyboard({
     };
 
     return (
-        <Div onMouseLeave={handleGlobalMouseUp} onMouseUp={handleGlobalMouseUp}>
+        <KeyboardContainer
+            onMouseLeave={handleGlobalMouseUp}
+            onMouseUp={handleGlobalMouseUp}
+        >
             {KEYBOARD_LAYOUT.map((keyObj) => {
                 const fullNote = `${keyObj.note}${keyObj.octave}`;
                 return (
@@ -63,6 +55,6 @@ export default function Keyboard({
                     />
                 );
             })}
-        </Div>
+        </KeyboardContainer>
     );
 }
