@@ -1,4 +1,4 @@
-import Key from './Key.jsx';
+import Key from './Key/Key.jsx';
 import { KeyboardContainer } from './Keyboard.style';
 import { useState } from 'react';
 import { KEYBOARD_LAYOUT } from '../../../constants/keyboardLayout.js';

@@ -4,7 +4,7 @@ import {
     Label,
     StyledInput,
 } from './SynthControls.style';
-import WaveformSelect from './WaveformSelect';
+import WaveformSelect from './WaveformSelect/WaveformSelect';
 import { dbToPercent } from '../../../utils/volumeUtils';
 import { MAX_VOLUME, MIN_VOLUME } from '../../../config/synthConfiguration';
 
@@ -141,7 +141,9 @@ export default function SynthControls({ settings, onSettingsChange }) {
                         )
                     }
                 />
+            </ControlGroup>
 
+            <ControlGroup>
                 <Label>chorus ({settings.effects.chorus.frequency})</Label>
                 <StyledInput
                     min="0.1"
@@ -155,7 +157,9 @@ export default function SynthControls({ settings, onSettingsChange }) {
                         })
                     }
                 />
+            </ControlGroup>
 
+            <ControlGroup>
                 <Label>reverb ({settings.effects.reverb.decay})</Label>
                 <StyledInput
                     min="0.1"

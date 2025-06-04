@@ -1,12 +1,12 @@
 import styled from 'styled-components';
 
 export const KeyboardContainer = styled.div`
-    background-color: #636363;
+    background-color:rgb(97, 97, 97);
     height: 200px;
+    width: 100%;
     display: flex;
-    gap: 0.08rem;
+    gap: 1px;
     flex-direction: row;
-    justify-content: space-between;
     position: relative;
     user-select: none;
 `;

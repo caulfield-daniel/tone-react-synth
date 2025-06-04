@@ -6,7 +6,7 @@ export const KeyButton = styled.button`
     font-size: ${(props) => (props.$isActive ? '20px' : '16px')};
     outline: none;
     border: none;
-    width: 70px;
+    width: 80px;
     background-color: white;
     transition: all 0.1s ease-in-out;
     cursor: pointer;
@@ -18,7 +18,7 @@ export const KeyButton = styled.button`
 `;
 
 export const BlackKeyButton = styled(KeyButton)`
-    width: 29px;
+    width: 29.3px;
     height: 120px;
     background-color: #303030;
     box-shadow: ${(props) =>

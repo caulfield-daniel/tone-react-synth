@@ -2,18 +2,21 @@ import styled from 'styled-components';
 
 export const ControlsContainer = styled.div`
     display: flex;
-    flex-direction: row;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 2rem;
     padding: 1rem;
     margin-bottom: 2rem;
     border: 1px solid #666;
+
 `;
 
 export const ControlGroup = styled.div`
     display: flex;
     flex-direction: column;
     gap: 0.1rem;
-    width: 100%;
+    width: 150px;
+    height: 150px;
+    border: 1px solid #666;
 `;
 
 export const Label = styled.label`
@@ -25,7 +28,7 @@ export const Label = styled.label`
 `;
 
 export const StyledInput = styled.input.attrs({ type: 'range' })`
-    width: 100%;
+    width: 95%;
     height: 5px;
     cursor: pointer;
 `;
