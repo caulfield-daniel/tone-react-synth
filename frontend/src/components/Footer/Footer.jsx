@@ -20,7 +20,7 @@ export default function Footer() {
     return (
         <StyledFooter>
             <FooterParagraph>
-                &copy; {currentYear} NCFU, Daniel Caulfield.
+                &copy; {currentYear} Daniel Caulfield, NCFU.
             </FooterParagraph>
         </StyledFooter>
     );

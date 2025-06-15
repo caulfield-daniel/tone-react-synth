@@ -7,7 +7,12 @@ export const WaveformIconContainer = styled.div`
     justify-content: center;
     padding: 8px;
     background-color: transparent;
+    border: 1px solid transparent;
     transition: background-color 0.1s ease-in-out;
+    transition: border-color 0.1s ease-in-out;
+    &:hover {
+        border-color: rgb(138, 255, 152);
+    }
 
     svg {
         font-size: 48px;
@@ -50,14 +55,6 @@ export const StyledSelect = styled(Select)`
         transition: background-color 0.1s ease-in-out;
         transition: border-color 0.1s ease-in-out;
         height: 100%;
-
-        &:hover {
-            border: 1px solid rgb(138, 255, 152);
-        }
-    }
-
-    .react-select__single-value {
-        color: white !important;
     }
 
     .react-select__menu {

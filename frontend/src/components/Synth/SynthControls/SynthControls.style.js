@@ -51,8 +51,10 @@ export const StyledInput = styled.input.attrs({ type: 'range' })`
     }
 
     &::-webkit-slider-runnable-track {
+        border: 1px solid transparent;
+        transition: border-color 0.15s ease-in-out;
         &:hover {
-            border: 1px solid rgb(138, 255, 152);
+            border-color: rgb(138, 255, 152);
         }
     }
 
