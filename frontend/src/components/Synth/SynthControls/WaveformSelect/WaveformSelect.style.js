@@ -6,15 +6,13 @@ export const WaveformIconContainer = styled.div`
     align-items: center;
     justify-content: center;
     padding: 8px;
-    gap: 10px;
+    background-color: transparent;
     transition: background-color 0.1s ease-in-out;
 
-    &:hover {
-        background-color: #666;
-    }
     svg {
-        font-size: 36px;
+        font-size: 48px;
         flex-shrink: 0;
+        color: rgb(138, 255, 152);
     }
 `;
 
@@ -22,15 +20,14 @@ export const StyledSelect = styled(Select)`
     display: flex;
     font-size: 1rem;
     border-radius: 4px;
-    border: 1px solid #666;
-    background: #555;
     color: white;
     z-index: 10;
     align-items: center;
     justify-content: center;
+    height: 100%;
 
     .react-select__control {
-        background: #555;
+        background: transparent;
         border: none;
         box-shadow: none;
         width: 100%;
@@ -51,10 +48,12 @@ export const StyledSelect = styled(Select)`
         align-items: center;
         justify-content: center;
         transition: background-color 0.1s ease-in-out;
-    }
+        transition: border-color 0.1s ease-in-out;
+        height: 100%;
 
-    .react-select__value-container:hover {
-        background-color: #666;
+        &:hover {
+            border: 1px solid rgb(138, 255, 152);
+        }
     }
 
     .react-select__single-value {
@@ -62,7 +61,8 @@ export const StyledSelect = styled(Select)`
     }
 
     .react-select__menu {
-        background: #55555577;
+        background: rgb(47, 47, 47);
+        width: auto;
         cursor: pointer;
     }
 

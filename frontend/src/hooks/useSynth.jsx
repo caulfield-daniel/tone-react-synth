@@ -24,7 +24,6 @@ export default function useSynth() {
                 options: {
                     oscillator: {
                         type: settings.oscillator,
-                        phase: 0, // Фиксированная фаза для избежания интерференции
                     },
                     envelope: settings.envelope,
                 },

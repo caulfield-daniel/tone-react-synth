@@ -1,5 +1,5 @@
 import { useReducer, useEffect, useCallback } from 'react';
-import { SynthContainer, NoteIndicator } from './Synth.style';
+import { SynthContainer, NoteIndicator, VersionLabel } from './Synth.style';
 import useSynth from '../../hooks/useSynth.jsx';
 import Keyboard from './Keyboard/Keyboard.jsx';
 import SynthControls from './SynthControls/SynthControls.jsx';
@@ -78,6 +78,8 @@ export default function Synth() {
                 activeNotes={activeNotes}
                 onClearNotes={handleClearNotes}
             />
+
+            <VersionLabel>v0.0.1</VersionLabel>
         </SynthContainer>
     );
 }
