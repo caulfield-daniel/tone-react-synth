@@ -32,14 +32,29 @@ export default function useSynth() {
             // 2. Инициализируем эффекты
             effectsRef.current = createEffects(settings);
 
-            // 3. Собираем цепочку обработки
-            synthRef.current.chain(
-                effectsRef.current.distortion,
-                effectsRef.current.chorus,
-                effectsRef.current.reverb,
-                effectsRef.current.limiter,
-                Tone.Destination
-            );
+            // 3. Собираем цепочку обработки с учетом активности эффектов
+            const effectsChain = [
+                {
+                    effect: effectsRef.current.distortion,
+                    active: settings.effects.distortion.active,
+                },
+                {
+                    effect: effectsRef.current.chorus,
+                    active: settings.effects.chorus.active,
+                },
+                {
+                    effect: effectsRef.current.reverb,
+                    active: settings.effects.reverb.active,
+                },
+                {
+                    effect: effectsRef.current.limiter,
+                    active: settings.effects.limiter.active,
+                },
+            ]
+                .filter((e) => e.active)
+                .map((e) => e.effect);
+
+            synthRef.current.chain(...effectsChain, Tone.Destination);
 
             // 4. Устанавливаем начальную громкость
             synthRef.current.set({ volume: settings.volume });
@@ -56,26 +71,69 @@ export default function useSynth() {
         }
     }, [settings.volume]);
 
+    useEffect(() => {
+        if (!isSynthAvailable() || !effectsRef.current) return;
+
+        // Временно отключаем синтезатор
+        synthRef.current.disconnect();
+
+        // Пересобираем цепочку с актуальными активными эффектами
+        const effectsChain = [
+            {
+                effect: effectsRef.current.distortion,
+                active: settings.effects.distortion.active,
+            },
+            {
+                effect: effectsRef.current.chorus,
+                active: settings.effects.chorus.active,
+            },
+            {
+                effect: effectsRef.current.reverb,
+                active: settings.effects.reverb.active,
+            },
+            {
+                effect: effectsRef.current.limiter,
+                active: settings.effects.limiter.active,
+            },
+        ]
+            .filter((e) => e.active)
+            .map((e) => e.effect);
+
+        synthRef.current.chain(...effectsChain, Tone.Destination);
+    }, [
+        settings.effects.distortion.active,
+        settings.effects.chorus.active,
+        settings.effects.reverb.active,
+        settings.effects.limiter.active,
+    ]);
+
     const updateEffects = useCallback(() => {
         if (!effectsRef.current) return;
 
         try {
-            // Обновляем параметры эффектов
-            effectsRef.current.distortion.distortion =
-                settings.effects.distortion;
-            effectsRef.current.chorus.set(settings.effects.chorus);
-            effectsRef.current.reverb.set({
-                ...settings.effects.reverb,
-                decay: Math.max(
-                    settings.effects.reverb.decay,
-                    MIN_REVERB_DECAY
-                ),
-            });
+            // Обновляем только активные эффекты
+            if (settings.effects.distortion.active) {
+                effectsRef.current.distortion.distortion =
+                    settings.effects.distortion;
+            }
+
+            if (settings.effects.chorus.active) {
+                effectsRef.current.chorus.set(settings.effects.chorus);
+            }
+
+            if (settings.effects.reverb.active) {
+                effectsRef.current.reverb.set({
+                    ...settings.effects.reverb,
+                    decay: Math.max(
+                        settings.effects.reverb.decay,
+                        MIN_REVERB_DECAY
+                    ),
+                });
+            }
         } catch (error) {
             console.error('Ошибка обновления эффектов:', error);
         }
     }, [settings.effects]);
-
     // Жизненный цикл
     useEffect(() => {
         initializeSynth();

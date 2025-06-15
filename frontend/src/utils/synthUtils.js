@@ -12,6 +12,6 @@ export function createEffects(settings) {
             ...settings.effects.reverb,
             decay: Math.max(settings.effects.reverb.decay, MIN_REVERB_DECAY),
         }),
-        limiter: new Tone.Limiter(DEFAULT_LIMITER),
+        limiter: new Tone.Limiter(DEFAULT_LIMITER.threshold),
     };
 }

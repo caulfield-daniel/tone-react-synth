@@ -9,5 +9,6 @@ export const DEFAULT_PARAMS = {
 };
 
 export const DEFAULT_LIMITER = {
+    active: true,
     threshold: -6,
 };

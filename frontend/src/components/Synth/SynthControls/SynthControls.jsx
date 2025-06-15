@@ -127,18 +127,19 @@ export default function SynthControls({ settings, onSettingsChange }) {
             </ControlGroup>
 
             <ControlGroup>
-                <Label>distortion ({settings.effects.distortion})</Label>
+                <Label>
+                    distortion ({settings.effects.distortion.distortion})
+                </Label>
                 <StyledInput
                     min="0"
                     max="1"
                     step="0.1"
-                    value={settings.effects.distortion}
+                    value={settings.effects.distortion.distortion}
                     onChange={(e) =>
-                        handleNestedChange(
-                            'effects',
-                            'distortion',
-                            Number(e.target.value)
-                        )
+                        handleNestedChange('effects', 'distortion', {
+                            ...settings.effects.distortion,
+                            distortion: Number(e.target.value),
+                        })
                     }
                 />
             </ControlGroup>
