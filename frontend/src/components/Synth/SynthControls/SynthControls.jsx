@@ -1,6 +1,7 @@
 import {
     ControlsContainer,
     ControlGroup,
+    EffectControlGroup,
     Label,
     StyledInput,
 } from './SynthControls.style';
@@ -126,7 +127,7 @@ export default function SynthControls({ settings, onSettingsChange }) {
                 />
             </ControlGroup>
 
-            <ControlGroup>
+            <EffectControlGroup>
                 <Label>
                     distortion ({settings.effects.distortion.distortion})
                 </Label>
@@ -142,9 +143,9 @@ export default function SynthControls({ settings, onSettingsChange }) {
                         })
                     }
                 />
-            </ControlGroup>
+            </EffectControlGroup>
 
-            <ControlGroup>
+            <EffectControlGroup>
                 <Label>chorus ({settings.effects.chorus.frequency})</Label>
                 <StyledInput
                     min="0.1"
@@ -158,9 +159,9 @@ export default function SynthControls({ settings, onSettingsChange }) {
                         })
                     }
                 />
-            </ControlGroup>
+            </EffectControlGroup>
 
-            <ControlGroup>
+            <EffectControlGroup>
                 <Label>reverb ({settings.effects.reverb.decay})</Label>
                 <StyledInput
                     min="0.1"
@@ -174,7 +175,7 @@ export default function SynthControls({ settings, onSettingsChange }) {
                         })
                     }
                 />
-            </ControlGroup>
+            </EffectControlGroup>
         </ControlsContainer>
     );
 }

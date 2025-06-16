@@ -8,6 +8,7 @@ import {
     ACTIONS,
     activeNotesReducer,
 } from '../../reducers/activeNotesReducer.js';
+import packageJson from '../../../package.json';
 
 export default function Synth() {
     const { playNote, stopNote, settings, setSettings, loadPreset } =
@@ -79,7 +80,7 @@ export default function Synth() {
                 onClearNotes={handleClearNotes}
             />
 
-            <VersionLabel>v0.0.1</VersionLabel>
+            <VersionLabel>v{packageJson.version}</VersionLabel>
         </SynthContainer>
     );
 }

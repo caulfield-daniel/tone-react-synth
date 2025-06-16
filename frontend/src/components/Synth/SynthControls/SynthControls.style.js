@@ -20,6 +20,13 @@ export const ControlGroup = styled.div`
     flex-grow: 1;
     padding: 0.5rem;
     padding-bottom: 2rem;
+    transition: all 0.2s ease-in-out;
+`;
+
+export const EffectControlGroup = styled(ControlGroup)`
+    &:hover {
+        border-color: rgb(138, 255, 152);
+    }
 `;
 
 export const Label = styled.label`
@@ -52,7 +59,7 @@ export const StyledInput = styled.input.attrs({ type: 'range' })`
 
     &::-webkit-slider-runnable-track {
         border: 1px solid transparent;
-        transition: border-color 0.15s ease-in-out;
+        transition: border-color 0.1s ease-in-out;
         &:hover {
             border-color: rgb(138, 255, 152);
         }
@@ -65,7 +72,7 @@ export const StyledInput = styled.input.attrs({ type: 'range' })`
         background: rgb(138, 255, 152);
         border-radius: 0;
         cursor: pointer;
-        transition: all 0.15s ease-in-out;
+        transition: all 0.1s ease-in-out;
 
         &:hover {
             box-shadow: 0 0 10px 3px rgba(138, 255, 152, 0.5);
@@ -79,7 +86,7 @@ export const StyledInput = styled.input.attrs({ type: 'range' })`
         background: rgb(138, 255, 152);
         border-radius: 0;
         cursor: pointer;
-        transition: all 0.15s ease-in-out;
+        transition: all 0.1s ease-in-out;
 
         &:hover {
             box-shadow: 0 0 10px 3px rgba(138, 255, 152, 0.5);
