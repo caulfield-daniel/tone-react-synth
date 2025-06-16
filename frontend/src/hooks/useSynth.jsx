@@ -16,6 +16,7 @@ export default function useSynth() {
     const initializeSynth = useCallback(() => {
         if (synthRef.current) return;
 
+        console.log(settings.effects);
         try {
             // 1. Создаем полифонический синтезатор
             synthRef.current = new Tone.PolySynth({
@@ -61,7 +62,7 @@ export default function useSynth() {
         } catch (error) {
             console.error('Ошибка инициализации:', error);
         }
-    }, [settings.oscillator, settings.envelope, settings.volume]);
+    }, [settings]);
 
     // Обновление параметров
 
@@ -76,7 +77,6 @@ export default function useSynth() {
 
         // Временно отключаем синтезатор
         synthRef.current.disconnect();
-
         // Пересобираем цепочку с актуальными активными эффектами
         const effectsChain = [
             {
@@ -113,8 +113,7 @@ export default function useSynth() {
         try {
             // Обновляем только активные эффекты
             if (settings.effects.distortion.active) {
-                effectsRef.current.distortion.distortion =
-                    settings.effects.distortion;
+                effectsRef.current.distortion.set(settings.effects.distortion);
             }
 
             if (settings.effects.chorus.active) {

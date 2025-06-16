@@ -6,7 +6,7 @@ import {
 
 export function createEffects(settings) {
     return {
-        distortion: new Tone.Distortion(settings.effects.distortion),
+        distortion: new Tone.Distortion(settings.effects.distortion.distortion),
         chorus: new Tone.Chorus(settings.effects.chorus),
         reverb: new Tone.Reverb({
             ...settings.effects.reverb,

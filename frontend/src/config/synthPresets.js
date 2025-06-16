@@ -11,9 +11,9 @@ export const SYNTH_PRESETS = {
             release: 0.2,
         },
         effects: {
-            distortion: { active: false, distortion: 0 },
-            chorus: { active: false, frequency: 1.5, depth: 0.5 },
-            reverb: { active: false, wet: 0.4, decay: 2.0 },
+            distortion: { active: true, distortion: 0 },
+            chorus: { active: true, frequency: 1.5, depth: 0.5 },
+            reverb: { active: true, wet: 0.4, decay: 2.0 },
             limiter: DEFAULT_LIMITER,
         },
     },

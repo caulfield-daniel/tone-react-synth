@@ -2,6 +2,7 @@ import {
     ControlsContainer,
     ControlGroup,
     EffectControlGroup,
+    EffectToggleButton,
     Label,
     StyledInput,
 } from './SynthControls.style';
@@ -23,10 +24,25 @@ export default function SynthControls({ settings, onSettingsChange }) {
         }));
     };
 
+    // Обработчики
+
     const handleWaveformChange = (value) => {
         onSettingsChange((prev) => ({
             ...prev,
             oscillator: value,
+        }));
+    };
+
+    const toggleEffect = (effectType) => {
+        onSettingsChange((prev) => ({
+            ...prev,
+            effects: {
+                ...prev.effects,
+                [effectType]: {
+                    ...prev.effects[effectType],
+                    active: !prev.effects[effectType].active,
+                },
+            },
         }));
     };
 
@@ -127,11 +143,16 @@ export default function SynthControls({ settings, onSettingsChange }) {
                 />
             </ControlGroup>
 
-            <EffectControlGroup>
+            <EffectControlGroup $isActive={settings.effects.distortion.active}>
+                <EffectToggleButton
+                    $isActive={settings.effects.distortion.active}
+                    onClick={() => toggleEffect('distortion')}
+                ></EffectToggleButton>
                 <Label>
                     distortion ({settings.effects.distortion.distortion})
                 </Label>
                 <StyledInput
+                    disabled={!settings.effects.distortion.active}
                     min="0"
                     max="1"
                     step="0.1"
@@ -145,9 +166,14 @@ export default function SynthControls({ settings, onSettingsChange }) {
                 />
             </EffectControlGroup>
 
-            <EffectControlGroup>
+            <EffectControlGroup $isActive={settings.effects.chorus.active}>
+                <EffectToggleButton
+                    $isActive={settings.effects.reverb.active}
+                    onClick={() => toggleEffect('chorus')}
+                ></EffectToggleButton>
                 <Label>chorus ({settings.effects.chorus.frequency})</Label>
                 <StyledInput
+                    disabled={!settings.effects.chorus.active}
                     min="0.1"
                     max="10"
                     step="0.1"
@@ -161,9 +187,14 @@ export default function SynthControls({ settings, onSettingsChange }) {
                 />
             </EffectControlGroup>
 
-            <EffectControlGroup>
+            <EffectControlGroup $isActive={settings.effects.reverb.active}>
+                <EffectToggleButton
+                    $isActive={settings.effects.reverb.active}
+                    onClick={() => toggleEffect('reverb')}
+                ></EffectToggleButton>
                 <Label>reverb ({settings.effects.reverb.decay})</Label>
                 <StyledInput
+                    disabled={!settings.effects.reverb.active}
                     min="0.1"
                     max="10"
                     step="0.1"

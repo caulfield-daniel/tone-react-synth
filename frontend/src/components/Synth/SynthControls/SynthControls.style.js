@@ -20,12 +20,39 @@ export const ControlGroup = styled.div`
     flex-grow: 1;
     padding: 0.5rem;
     padding-bottom: 2rem;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.1s ease;
+`;
+
+export const EffectToggleButton = styled.button`
+    outline: none;
+    user-select: none;
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 4%;
+    top: 10%;
+    border: 1px solid rgb(70, 70, 70);
+    background-color: transparent;
+    cursor: pointer;
+
+    &:hover {
+        border-color: rgba(255, 255, 255, 0.5);
+    }
 `;
 
 export const EffectControlGroup = styled(ControlGroup)`
+    position: relative;
+    border-color: ${(props) =>
+        props.$isActive ? 'rgb(138, 255, 152)' : 'rgb(70, 70, 70)'};
+
+    box-shadow: ${(props) =>
+        props.$isActive ? '0 0 7px 3px rgba(138, 255, 152, 0.5)' : 'none'};
+
     &:hover {
-        border-color: rgb(138, 255, 152);
+        border-color: ${(props) =>
+            props.$isActive
+                ? 'rgb(138, 255, 152)'
+                : 'rgba(255, 255, 255, 0.5)'};
     }
 `;
 
@@ -38,16 +65,19 @@ export const Label = styled.label`
 `;
 
 export const StyledInput = styled.input.attrs({ type: 'range' })`
+    outline: none;
+    user-select: none;
     height: 10px;
-    cursor: pointer;
     margin: auto;
     -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 
     &::-webkit-slider-thumb {
         appearance: none;
         width: 10px;
         height: 20px;
-        background: rgb(138, 255, 152);
+        background: rgba(138, 255, 152);
         border-radius: 0;
         cursor: pointer;
         transition: all 0.1s ease-in-out;
@@ -58,10 +88,13 @@ export const StyledInput = styled.input.attrs({ type: 'range' })`
     }
 
     &::-webkit-slider-runnable-track {
-        border: 1px solid transparent;
+        border: ${(props) =>
+            !props.disabled
+                ? '1px solid transparent'
+                : '1px solid rgb(70, 70, 70)'};
         transition: border-color 0.1s ease-in-out;
         &:hover {
-            border-color: rgb(138, 255, 152);
+            border-color: rgba(255, 255, 255, 0.5);
         }
     }
 
@@ -69,7 +102,8 @@ export const StyledInput = styled.input.attrs({ type: 'range' })`
         appearance: none;
         width: 10px;
         height: 15px;
-        background: rgb(138, 255, 152);
+        background: ${(props) =>
+            !props.disabled ? 'rgba(138, 255, 152)' : 'rgb(70, 70, 70)'};
         border-radius: 0;
         cursor: pointer;
         transition: all 0.1s ease-in-out;
