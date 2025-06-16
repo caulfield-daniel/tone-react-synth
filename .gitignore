@@ -1,0 +1,45 @@
+# Django
+*.pyc
+__pycache__/
+db.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.DS_Store
+.env
+.idea/
+.vscode/
+
+# React
+node_modules/
+build/
+.DS_Store
+.env
+.idea/
+.vscode/
+
+# Other
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.log
+*.lock
+*.pid
+*.DS_Store
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
