@@ -1,3 +1,4 @@
+backend/venv/
 # Django
 *.pyc
 __pycache__/
