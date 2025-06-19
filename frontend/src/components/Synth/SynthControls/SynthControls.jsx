@@ -7,6 +7,7 @@ import {
     StyledInput,
 } from './SynthControls.style';
 import WaveformSelect from './WaveformSelect/WaveformSelect';
+import PresetManager from './PresetManager/PresetManager';
 import { dbToPercent } from '../../../utils/volumeUtils';
 import { MAX_VOLUME, MIN_VOLUME } from '../../../config/synthConfiguration';
 
@@ -48,6 +49,7 @@ export default function SynthControls({ settings, onSettingsChange }) {
 
     return (
         <ControlsContainer>
+            <PresetManager />
             <ControlGroup>
                 <Label>waveform</Label>
                 <WaveformSelect
