@@ -10,6 +10,9 @@ import WaveformSelect from './WaveformSelect/WaveformSelect';
 import PresetManager from './PresetManager/PresetManager';
 import { dbToPercent } from '../../../utils/volumeUtils';
 import { MAX_VOLUME, MIN_VOLUME } from '../../../config/synthConfiguration';
+import { SYNTH_PRESETS } from '../../../config/synthPresets';
+
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
 export default function SynthControls({ settings, onSettingsChange }) {
     const handleNestedChange = (parent, child, value) => {
@@ -47,9 +50,23 @@ export default function SynthControls({ settings, onSettingsChange }) {
         }));
     };
 
+    const handleApply = (presetData) => {
+        onSettingsChange((prev) => ({ ...prev, ...presetData }));
+    };
+
+    const handleReset = () => {
+        onSettingsChange((prev) => ({ ...prev, ...SYNTH_PRESETS.default }));
+    };
+
     return (
         <ControlsContainer>
-            <PresetManager />
+            <PresetManager
+                currentPresetData={settings}
+                onApplyPreset={handleApply}
+                onResetPreset={handleReset}
+                apiBaseUrl={apiBaseUrl}
+                localPresets={SYNTH_PRESETS}
+            />
             <ControlGroup>
                 <Label>waveform</Label>
                 <WaveformSelect

@@ -77,7 +77,7 @@ export const StyledInput = styled.input.attrs({ type: 'range' })`
         appearance: none;
         width: 10px;
         height: 20px;
-        background: rgba(138, 255, 152);
+        background: rgb(138, 255, 152);
         border-radius: 0;
         cursor: pointer;
         transition: all 0.1s ease-in-out;
