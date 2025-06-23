@@ -89,7 +89,6 @@ export const PMTextInput = styled.input.attrs({ type: 'text' })`
     }
 `;
 
-// Стили для react-select, чтобы селект в PresetManager выглядел аналогично ControlGroup
 export const PMSelect = styled(Select).attrs({
     classNamePrefix: 'react-select',
 })`

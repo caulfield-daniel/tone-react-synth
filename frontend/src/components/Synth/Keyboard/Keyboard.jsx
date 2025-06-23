@@ -1,7 +1,7 @@
 import Key from './Key/Key.jsx';
 import { KeyboardContainer } from './Keyboard.style';
 import { useState } from 'react';
-import { KEYBOARD_LAYOUT } from '../../../constants/keyboardLayout.js';
+import { KEYBOARD_LAYOUT } from '../../../utils/keyboardUtils.js';
 
 export default function Keyboard({
     activeNotes,
