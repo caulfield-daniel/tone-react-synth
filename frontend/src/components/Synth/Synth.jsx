@@ -3,7 +3,7 @@ import { SynthContainer, NoteIndicator, VersionLabel } from './Synth.style';
 import useSynth from '../../hooks/useSynth.jsx';
 import Keyboard from './Keyboard/Keyboard.jsx';
 import SynthControls from './SynthControls/SynthControls.jsx';
-import { getNoteFromKey } from '../../constants/keyboardLayout.js';
+import { getNoteFromKey } from '../../utils/keyboardLayout.js';
 import {
     ACTIONS,
     activeNotesReducer,
