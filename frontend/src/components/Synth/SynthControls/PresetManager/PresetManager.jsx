@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     PMContainer,
     PMButton,
@@ -10,7 +10,6 @@ import {
     PMButtonsGroup,
     PMInputSelectGroup,
 } from './PresetManager.style';
-
 import {
     TbDownload,
     TbUpload,
@@ -27,22 +26,19 @@ export default function PresetManager({
     localPresets = {},
 }) {
     const [presetName, setPresetName] = useState('');
-    // список серверных пресетов
     const [serverPresets, setServerPresets] = useState([]);
-    // выбранная опция react-select
     const [selectedPresetOption, setSelectedPresetOption] = useState(null);
-    // ошибки публикации
     const [publishError, setPublishError] = useState('');
-    // состояния загрузки
-    const [loadingList, setLoadingList] = useState(false);
-    const [publishing, setPublishing] = useState(false);
-    const [loadingPreset, setLoadingPreset] = useState(false);
+    const [loading, setLoading] = useState({
+        list: false,
+        preset: false,
+        publishing: false,
+    });
 
     const fileInputRef = useRef(null);
 
-    // Загрузка списка серверных пресетов
-    const fetchServerPresets = async () => {
-        setLoadingList(true);
+    const fetchServerPresets = useCallback(async () => {
+        setLoading((prev) => ({ ...prev, list: true }));
         try {
             const resp = await fetch(`${apiBaseUrl}/presets/`);
             if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
@@ -52,246 +48,229 @@ export default function PresetManager({
             console.error('Не удалось получить список пресетов:', err);
             alert('Ошибка при загрузке списка пресетов с сервера');
         } finally {
-            setLoadingList(false);
+            setLoading((prev) => ({ ...prev, list: false }));
         }
-    };
+    }, [apiBaseUrl]);
 
     useEffect(() => {
         fetchServerPresets();
-    }, []);
+    }, [fetchServerPresets]);
 
-    // Подготовка опций для react-select
-    const localPresetNames = Object.keys(localPresets || {});
-    const localOptions = localPresetNames.map((name) => ({
-        value: `local:${name}`,
-        label: name,
-    }));
-    const serverOptions = serverPresets.map((p) => ({
-        value: `server:${p.id}`,
-        label: p.name,
-    }));
-    const groupedOptions = [];
-    if (localOptions.length > 0) {
-        groupedOptions.push({ label: 'Локальные', options: localOptions });
-    }
-    if (serverOptions.length > 0) {
-        groupedOptions.push({ label: 'Серверные', options: serverOptions });
-    }
+    const presetOptions = useMemo(() => {
+        const localOptions = Object.keys(localPresets).map((name) => ({
+            value: `local:${name}`,
+            label: name,
+        }));
 
-    // Обработчик выбора
-    const handleSelectPreset = (option) => {
-        setSelectedPresetOption(option);
-        setPublishError('');
-        setPresetName('');
+        const serverOptions = serverPresets.map((p) => ({
+            value: `server:${p.id}`,
+            label: p.name,
+        }));
 
-        if (!option) {
-            // сброс
-            return;
+        const groups = [];
+        if (localOptions.length) {
+            groups.push({ label: 'Локальные', options: localOptions });
         }
-        const [type, key] = option.value.split(':');
-        if (type === 'local') {
-            const presetData = localPresets[key];
-            if (presetData) {
-                onApplyPreset(presetData);
-                setPresetName(key);
-            } else {
-                console.warn(`Локальный пресет ${key} не найден`);
-            }
-        } else if (type === 'server') {
-            setLoadingPreset(true);
-            (async () => {
+        if (serverOptions.length) {
+            groups.push({ label: 'Серверные', options: serverOptions });
+        }
+
+        return groups;
+    }, [localPresets, serverPresets]);
+
+    const handleSelectPreset = useCallback(
+        async (option) => {
+            setSelectedPresetOption(option);
+            setPublishError('');
+            setPresetName('');
+
+            if (!option) return;
+
+            const [type, key] = option.value.split(':');
+
+            if (type === 'local') {
+                const presetData = localPresets[key];
+                if (presetData) {
+                    onApplyPreset(presetData);
+                    setPresetName(key);
+                }
+            } else if (type === 'server') {
+                setLoading((prev) => ({ ...prev, preset: true }));
                 try {
                     const resp = await fetch(`${apiBaseUrl}/presets/${key}/`);
                     if (!resp.ok) throw new Error(`Ошибка ${resp.status}`);
-                    const obj = await resp.json();
-                    if (obj.data) {
-                        onApplyPreset(obj.data);
-                        setPresetName(obj.name || '');
-                    } else {
-                        alert(
-                            'Некорректный ответ при загрузке пресета с сервера'
-                        );
-                    }
+                    const { data, name } = await resp.json();
+                    onApplyPreset(data);
+                    setPresetName(name || '');
                 } catch (err) {
-                    console.error(
-                        'Ошибка при загрузке пресета с сервера:',
-                        err
-                    );
+                    console.error('Ошибка при загрузке пресета:', err);
                     alert('Ошибка при загрузке пресета с сервера');
                 } finally {
-                    setLoadingPreset(false);
+                    setLoading((prev) => ({ ...prev, preset: false }));
                 }
-            })();
-        }
-    };
+            }
+        },
+        [apiBaseUrl, localPresets, onApplyPreset]
+    );
 
-    // Сохранение текущего пресета как файл
-    const handleSaveToFile = () => {
+    const handleSaveToFile = useCallback(() => {
         const dataStr = JSON.stringify(currentPresetData, null, 2);
         const blob = new Blob([dataStr], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        const name = presetName || 'preset';
         a.href = url;
-        a.download = `${name}.json`;
+        a.download = `${presetName || 'preset'}.json`;
         a.click();
         URL.revokeObjectURL(url);
-    };
+    }, [currentPresetData, presetName]);
 
-    // Загрузка из локального файла
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            try {
-                const obj = JSON.parse(evt.target.result);
-                onApplyPreset(obj);
-                setPresetName('');
-                setSelectedPresetOption(null);
-            } catch (err) {
-                alert('Неверный формат файла пресета', err);
-            }
-        };
-        reader.readAsText(file);
-        e.target.value = '';
-    };
-    const handleLoadFromFile = () => {
-        if (fileInputRef.current) fileInputRef.current.click();
-    };
+    const handleLoadFromFile = useCallback(
+        (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    // Публикация пресета на сервер
-    const handlePublish = async () => {
-        setPublishError('');
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    onApplyPreset(data);
+                    setPresetName('');
+                    setSelectedPresetOption(null);
+                } catch {
+                    alert('Неверный формат файла пресета');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        },
+        [onApplyPreset]
+    );
+
+    const handlePublish = useCallback(async () => {
         const name = presetName.trim();
         if (!name) {
             setPublishError('Введите имя пресета');
             return;
         }
-        setPublishing(true);
+
+        setLoading((prev) => ({ ...prev, publishing: true }));
+        setPublishError('');
+
         try {
-            const payload = { name, data: currentPresetData };
-            const resp = await fetch(`${apiBaseUrl}/presets/`, {
+            const response = await fetch(`${apiBaseUrl}/presets/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
+                body: JSON.stringify({ name, data: currentPresetData }),
             });
-            const text = await resp.text();
-            let result = null;
-            try {
-                result = text ? JSON.parse(text) : null;
-            } catch (err) {
-                console.error('Ошибка при парсинге ответа:', err);
-            }
-            if (resp.status === 201) {
+
+            const result = await response.json().catch(() => null);
+
+            if (response.status === 201) {
                 alert('Пресет опубликован успешно');
                 await fetchServerPresets();
                 setSelectedPresetOption(null);
                 setPresetName('');
-            } else if (resp.status === 400) {
-                const errMsg =
-                    result &&
-                    (result.error || (result.name && result.name.join(' ')))
-                        ? result.error || result.name.join(' ')
-                        : 'Ошибка публикации';
-                setPublishError(errMsg);
+            } else if (response.status === 400) {
+                setPublishError(
+                    result?.error ||
+                        result?.name?.join(' ') ||
+                        'Ошибка публикации'
+                );
             } else {
-                console.error('Ошибка при публикации:', resp.status, result);
                 setPublishError('Не удалось опубликовать пресет');
             }
         } catch (err) {
-            console.error('Ошибка при публикации пресета:', err);
+            console.error('Ошибка при публикации:', err);
             setPublishError('Ошибка при публикации пресета');
         } finally {
-            setPublishing(false);
+            setLoading((prev) => ({ ...prev, publishing: false }));
         }
-    };
+    }, [apiBaseUrl, currentPresetData, fetchServerPresets, presetName]);
 
-    // Сброс к дефолту
-    const handleReset = () => {
+    const handleReset = useCallback(() => {
         onResetPreset();
         setPresetName('');
         setSelectedPresetOption(null);
         setPublishError('');
-    };
+    }, [onResetPreset]);
+
+    const isButtonDisabled = loading.preset || loading.publishing;
 
     return (
         <PMContainer>
             <HiddenFileInput
-                accept="application/json"
                 ref={fileInputRef}
-                onChange={handleFileChange}
+                type="file"
+                accept=".json"
+                onChange={handleLoadFromFile}
             />
 
             <PMInputSelectGroup>
                 <PMGroup>
                     <PMTextInput
-                        placeholder=">"
+                        placeholder="Имя пресета"
                         value={presetName}
                         onChange={(e) => {
                             setPresetName(e.target.value);
                             setPublishError('');
                         }}
-                        disabled={publishing || loadingPreset}
+                        disabled={isButtonDisabled}
                     />
-                    {publishError && <PMLabel>{publishError}</PMLabel>}
+                    {publishError && <PMLabel $error>{publishError}</PMLabel>}
                 </PMGroup>
 
                 <PMGroup>
                     <PMSelect
-                        options={groupedOptions}
+                        options={presetOptions}
                         value={selectedPresetOption}
                         onChange={handleSelectPreset}
-                        isDisabled={loadingList || loadingPreset || publishing}
-                        placeholder={loadingList ? 'loading' : 'preset'}
+                        isDisabled={loading.list || isButtonDisabled}
+                        placeholder={
+                            loading.list ? 'Загрузка...' : 'Выберите пресет'
+                        }
                     />
                 </PMGroup>
             </PMInputSelectGroup>
 
-            {loadingPreset && <PMLabel>applying...</PMLabel>}
+            {loading.preset && <PMLabel>Применение...</PMLabel>}
 
             <PMButtonsGroup>
                 <PMButton
                     onClick={handleSaveToFile}
-                    aria-label="save as file"
-                    title="save as file"
-                    disabled={publishing || loadingPreset}
+                    disabled={isButtonDisabled}
+                    title="Сохранить в файл"
                 >
                     <TbDownload />
                 </PMButton>
 
                 <PMButton
-                    onClick={handleLoadFromFile}
-                    aria-label="load from file"
-                    title="laod from file"
-                    disabled={publishing || loadingPreset}
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isButtonDisabled}
+                    title="Загрузить из файла"
                 >
                     <TbUpload />
                 </PMButton>
 
                 <PMButton
                     onClick={handlePublish}
-                    aria-label="upload to bank"
-                    title="upload preset to preset bank"
-                    disabled={publishing || loadingPreset}
+                    disabled={isButtonDisabled}
+                    title="Опубликовать на сервере"
                 >
                     <TbCloudUpload />
                 </PMButton>
 
                 <PMButton
                     onClick={fetchServerPresets}
-                    aria-label="refresh preset list"
-                    title="refresh preset list"
-                    disabled={loadingList || publishing || loadingPreset}
+                    disabled={loading.list || isButtonDisabled}
+                    title="Обновить список пресетов"
                 >
                     <TbRefresh />
                 </PMButton>
 
                 <PMButton
                     onClick={handleReset}
-                    aria-label="reset preset"
-                    title="reset preset settings to default"
-                    disabled={publishing || loadingPreset}
+                    disabled={isButtonDisabled}
+                    title="Сбросить к настройкам по умолчанию"
                 >
                     <TbRotateClockwise />
                 </PMButton>
