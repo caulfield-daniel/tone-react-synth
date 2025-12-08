@@ -43,7 +43,7 @@ export default function useSynth() {
                 SYNTH_PRESETS.default.effects
             );
 
-            synthRef.current.chain(...initialChain, Tone.Destination);
+            synthRef.current.chain(...initialChain, Tone.getDestination);
             synthRef.current.set({ volume: SYNTH_PRESETS.default.volume });
 
             isInitializedRef.current = true;
