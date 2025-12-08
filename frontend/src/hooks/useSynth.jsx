@@ -2,104 +2,116 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import * as Tone from 'tone';
 import { SYNTH_PRESETS } from '../config/synthPresets';
 import { MIN_REVERB_DECAY, MAX_POLYPHONY } from '../config/synthConfiguration';
-import { createEffects } from '../utils/synthUtils';
+import {
+    createEffects,
+    buildEffectsChain,
+} from '../utils/synthUtils';
 
 export default function useSynth() {
     const [settings, setSettings] = useState(SYNTH_PRESETS.default);
     const synthRef = useRef(null);
     const effectsRef = useRef(null);
+    const isInitializedRef = useRef(false);
 
-    const isSynthAvailable = () =>
-        synthRef.current && !synthRef.current.disposed;
 
-    // Инициализация синтезатора и эффектов
+    /**
+     * Функция для инициализации синтезатора ОДИН РАЗ
+     * Не зависит от settings и вызывается только при монтировании
+     */
     const initializeSynth = useCallback(() => {
         if (synthRef.current) return;
 
-        console.log(settings.effects);
         try {
-            // 1. Создаем полифонический синтезатор
+            console.log('Initializing synth...');
+
+            // Создаем полифонический синтезатор с дефолтными настройками
             synthRef.current = new Tone.PolySynth({
                 maxPolyphony: MAX_POLYPHONY,
                 voice: Tone.Synth,
                 options: {
-                    oscillator: {
-                        type: settings.oscillator,
-                    },
-                    envelope: settings.envelope,
+                    oscillator: { type: SYNTH_PRESETS.default.oscillator },
+                    envelope: SYNTH_PRESETS.default.envelope,
                 },
             });
 
-            // 2. Инициализируем эффекты
-            effectsRef.current = createEffects(settings);
+            // Создаем эффекты с дефолтными настройками
+            effectsRef.current = createEffects(SYNTH_PRESETS.default);
 
-            // 3. Собираем цепочку обработки с учетом активности эффектов
-            const effectsChain = [
-                {
-                    effect: effectsRef.current.distortion,
-                    active: settings.effects.distortion.active,
-                },
-                {
-                    effect: effectsRef.current.chorus,
-                    active: settings.effects.chorus.active,
-                },
-                {
-                    effect: effectsRef.current.reverb,
-                    active: settings.effects.reverb.active,
-                },
-                {
-                    effect: effectsRef.current.limiter,
-                    active: settings.effects.limiter.active,
-                },
-            ]
-                .filter((e) => e.active)
-                .map((e) => e.effect);
+            // Собираем начальную цепочку эффектов
+            const initialChain = buildEffectsChain(
+                effectsRef.current,
+                SYNTH_PRESETS.default.effects
+            );
 
-            synthRef.current.chain(...effectsChain, Tone.Destination);
+            synthRef.current.chain(...initialChain, Tone.Destination);
+            synthRef.current.set({ volume: SYNTH_PRESETS.default.volume });
 
-            // 4. Устанавливаем начальную громкость
-            synthRef.current.set({ volume: settings.volume });
+            isInitializedRef.current = true;
+            console.log('Synth initialized successfully');
         } catch (error) {
-            console.error('Ошибка инициализации:', error);
+            console.error('Ошибка инициализации синтезатора:', error);
+            isInitializedRef.current = false;
         }
-    }, [settings]);
+    }, []);
 
-    // Обновление параметров
+    /**
+     * Функция для обновления параметров эффектов
+     * Вызывается при изменении settings.effects
+     */
+    const updateEffectParameters = useCallback(() => {
+        if (!effectsRef.current) return;
 
-    useEffect(() => {
-        if (isSynthAvailable()) {
-            synthRef.current.set({ volume: settings.volume });
+        const { distortion, chorus, reverb } = settings.effects;
+
+        try {
+            // Обновляем параметры независимо от активности
+            effectsRef.current.distortion.set({
+                distortion: distortion.distortion,
+                wet: distortion.active ? 1.0 : 0.0,
+            });
+
+            effectsRef.current.chorus.set({
+                frequency: chorus.frequency,
+                depth: chorus.depth || 0.5, // Добавляем дефолтное значение, если отсутствует
+                wet: chorus.active ? 1.0 : 0.0,
+            });
+
+            effectsRef.current.reverb.set({
+                decay: Math.max(reverb.decay, MIN_REVERB_DECAY),
+                wet: reverb.active ? 1.0 : 0.0,
+            });
+        } catch (error) {
+            console.error('Ошибка обновления параметров эффектов:', error);
         }
-    }, [settings.volume]);
+    }, [settings.effects]);
 
-    useEffect(() => {
-        if (!isSynthAvailable() || !effectsRef.current) return;
+    /**
+     * Функция для обновления цепочки эффектов
+     * Вызывается только при изменении активности эффектов
+     */
+    const updateEffectsChain = useCallback(() => {
+        if (
+            !synthRef.current ||
+            !effectsRef.current ||
+            !isInitializedRef.current
+        )
+            return;
 
-        // Временно отключаем синтезатор
-        synthRef.current.disconnect();
-        // Пересобираем цепочку с актуальными активными эффектами
-        const effectsChain = [
-            {
-                effect: effectsRef.current.distortion,
-                active: settings.effects.distortion.active,
-            },
-            {
-                effect: effectsRef.current.chorus,
-                active: settings.effects.chorus.active,
-            },
-            {
-                effect: effectsRef.current.reverb,
-                active: settings.effects.reverb.active,
-            },
-            {
-                effect: effectsRef.current.limiter,
-                active: settings.effects.limiter.active,
-            },
-        ]
-            .filter((e) => e.active)
-            .map((e) => e.effect);
+        try {
+            // Временно отключаем синтезатор для пересборки цепочки
+            synthRef.current.disconnect();
 
-        synthRef.current.chain(...effectsChain, Tone.Destination);
+            // Собираем актуальную цепочку
+            const activeChain = buildEffectsChain(
+                effectsRef.current,
+                settings.effects
+            );
+            synthRef.current.chain(...activeChain, Tone.getDestination);
+
+            console.log('Effects chain updated');
+        } catch (error) {
+            console.error('Ошибка обновления цепочки эффектов:', error);
+        }
     }, [
         settings.effects.distortion.active,
         settings.effects.chorus.active,
@@ -107,84 +119,168 @@ export default function useSynth() {
         settings.effects.limiter.active,
     ]);
 
-    const updateEffects = useCallback(() => {
-        if (!effectsRef.current) return;
-
-        try {
-            // Обновляем только активные эффекты
-            if (settings.effects.distortion.active) {
-                effectsRef.current.distortion.set(settings.effects.distortion);
-            }
-
-            if (settings.effects.chorus.active) {
-                effectsRef.current.chorus.set(settings.effects.chorus);
-            }
-
-            if (settings.effects.reverb.active) {
-                effectsRef.current.reverb.set({
-                    ...settings.effects.reverb,
-                    decay: Math.max(
-                        settings.effects.reverb.decay,
-                        MIN_REVERB_DECAY
-                    ),
-                });
-            }
-        } catch (error) {
-            console.error('Ошибка обновления эффектов:', error);
-        }
-    }, [settings.effects]);
-    // Жизненный цикл
+    /**
+     * Инициализация при монтировании
+     */
     useEffect(() => {
         initializeSynth();
-        updateEffects();
 
+        // Очистка при размонтировании
         return () => {
             try {
-                if (isSynthAvailable()) {
+                console.log('Cleaning up synth...');
+
+                if (synthRef.current) {
                     synthRef.current.dispose();
                     synthRef.current = null;
                 }
 
-                Object.values(effectsRef.current || {}).forEach((effect) => {
-                    if (effect && !effect.disposed) effect.dispose();
-                });
-                effectsRef.current = null;
+                if (effectsRef.current) {
+                    Object.values(effectsRef.current).forEach((effect) => {
+                        if (effect && !effect.disposed) {
+                            effect.dispose();
+                        }
+                    });
+                    effectsRef.current = null;
+                }
+
+                isInitializedRef.current = false;
             } catch (error) {
-                console.error('Ошибка очистки ресурсов:', error);
+                console.error('Ошибка при очистке ресурсов:', error);
             }
         };
-    }, [initializeSynth, updateEffects]);
+    }, [initializeSynth]);
 
-    // API для компонентов
+    /**
+     * Обновление громкости
+     */
+    useEffect(() => {
+        if (!synthRef.current || !isInitializedRef.current) return;
+
+        try {
+            synthRef.current.set({ volume: settings.volume });
+        } catch (error) {
+            console.error('Ошибка обновления громкости:', error);
+        }
+    }, [settings.volume]);
+
+    /**
+     * Обновление осциллятора и огибающей
+     */
+    useEffect(() => {
+        if (!synthRef.current || !isInitializedRef.current) return;
+
+        try {
+            // Обновляем осциллятор и огибающую у всех голосов
+            synthRef.current.set({
+                oscillator: { type: settings.oscillator },
+                envelope: settings.envelope,
+            });
+
+            console.log('Oscillator and envelope updated');
+        } catch (error) {
+            console.error(
+                'Ошибка обновления осциллятора или огибающей:',
+                error
+            );
+        }
+    }, [settings.oscillator, settings.envelope]);
+
+    /**
+     * Обновление параметров эффектов
+     */
+    useEffect(() => {
+        if (!isInitializedRef.current) return;
+
+        updateEffectParameters();
+    }, [updateEffectParameters]);
+
+    /**
+     * Обновление цепочки эффектов при изменении их активности
+     */
+    useEffect(() => {
+        if (!isInitializedRef.current) return;
+
+        updateEffectsChain();
+    }, [updateEffectsChain]);
+
+    /**
+     * Безопасная проверка доступности синтезатора
+     */
+    const isSynthAvailable = useCallback(() => {
+        return (
+            synthRef.current &&
+            synthRef.current.disposed !== undefined &&
+            !synthRef.current.disposed
+        );
+    }, []);
+
+    /**
+     * 11. API методы
+     */
     const loadPreset = useCallback((presetName) => {
         const preset = SYNTH_PRESETS[presetName];
-        if (!preset) return console.warn(`Пресет "${presetName}" не найден`);
-
-        setSettings((prev) => ({
-            ...prev,
-            ...preset,
-        }));
-    }, []);
-
-    const playNote = useCallback((note) => {
-        try {
-            if (isSynthAvailable()) {
-                synthRef.current.triggerAttack(note, Tone.now());
-            }
-        } catch (error) {
-            console.error('Ошибка воспроизведения:', error);
+        if (!preset) {
+            console.warn(`Пресет "${presetName}" не найден`);
+            return;
         }
+
+        // Используем глубокое слияние для безопасности
+        setSettings((prev) => {
+            const newSettings = {
+                ...prev,
+                ...preset,
+                envelope: { ...prev.envelope, ...(preset.envelope || {}) },
+                effects: {
+                    ...prev.effects,
+                    ...(preset.effects || {}),
+                    distortion: {
+                        ...prev.effects.distortion,
+                        ...(preset.effects?.distortion || {}),
+                    },
+                    chorus: {
+                        ...prev.effects.chorus,
+                        ...(preset.effects?.chorus || {}),
+                    },
+                    reverb: {
+                        ...prev.effects.reverb,
+                        ...(preset.effects?.reverb || {}),
+                    },
+                    limiter: {
+                        ...prev.effects.limiter,
+                        ...(preset.effects?.limiter || {}),
+                    },
+                },
+            };
+            return newSettings;
+        });
     }, []);
 
-    const stopNote = useCallback((note) => {
-        try {
-            if (isSynthAvailable()) {
-                synthRef.current.triggerRelease(note, Tone.now());
+    const playNote = useCallback(
+        (note) => {
+            try {
+                if (isSynthAvailable()) {
+                    synthRef.current.triggerAttack(note, Tone.now());
+                }
+            } catch (error) {
+                console.error('Ошибка воспроизведения ноты:', error);
             }
-        } catch (error) {
-            console.error('Ошибка остановки:', error);
-        }
-    }, []);
+        },
+        [isSynthAvailable]
+    );
+
+    const stopNote = useCallback(
+        (note) => {
+            try {
+                if (isSynthAvailable()) {
+                    synthRef.current.triggerRelease(note, Tone.now());
+                }
+            } catch (error) {
+                console.error('Ошибка остановки ноты:', error);
+            }
+        },
+        [isSynthAvailable]
+    );
 
     return {
         playNote,
@@ -192,5 +288,6 @@ export default function useSynth() {
         settings,
         setSettings,
         loadPreset,
+        isInitialized: isInitializedRef.current,
     };
 }
