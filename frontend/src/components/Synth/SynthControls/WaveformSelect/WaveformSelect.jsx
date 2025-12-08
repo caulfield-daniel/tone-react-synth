@@ -4,6 +4,9 @@ import {
     PiWaveSine,
     PiWaveSquare,
     PiWaveTriangle,
+    PiPulse,
+    PiWaveSawtoothBold,
+    PiWaveTriangleBold,
 } from 'react-icons/pi';
 
 const options = [
@@ -26,6 +29,21 @@ const options = [
         value: 'triangle',
         label: 'triangle',
         icon: <PiWaveTriangle />,
+    },
+    {
+        value: 'pulse',
+        label: 'pulse',
+        icon: <PiPulse />,
+    },
+    {
+        value: 'fattriangle',
+        label: 'fat triangle',
+        icon: <PiWaveTriangleBold />,
+    },
+    {
+        value: 'fatsawtooth',
+        label: 'fat sawtooth',
+        icon: <PiWaveSawtoothBold />,
     },
 ];
 
