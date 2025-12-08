@@ -1,4 +1,5 @@
 import { ControlGroup, Label, StyledInput } from './SynthControls.style';
+import { Fragment } from 'react';
 
 const ENVELOPE_CONFIG = {
     attack: { min: 0, max: 5, step: 0.01 },
@@ -15,7 +16,7 @@ export default function EnvelopeControl({ envelope, onChange }) {
     return (
         <ControlGroup>
             {Object.entries(ENVELOPE_CONFIG).map(([key, config]) => (
-                <div key={key}>
+                <Fragment key={key}>
                     <Label>
                         {key} ({envelope[key]})
                     </Label>
@@ -26,7 +27,7 @@ export default function EnvelopeControl({ envelope, onChange }) {
                         value={envelope[key]}
                         onChange={(e) => handleChange(key, e.target.value)}
                     />
-                </div>
+                </Fragment>
             ))}
         </ControlGroup>
     );
