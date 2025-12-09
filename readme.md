@@ -112,25 +112,53 @@ npm run dev
 ## Структура проекта
 
 ```bash
-react-web-synth/
-├── src/
-│   ├── components/          # React компоненты
-│   │   ├── Synth/          # Основной компонент синтезатора
-│   │   ├── Keyboard/       # Визуальная клавиатура
-│   │   └── SynthControls/  # Элементы управления
-│   ├── hooks/              # Кастомные React хуки
-│   │   ├── useSynth.jsx    # Основная логика синтезатора
-│   │   ├── useActiveNotes.jsx # Управление активными нотами
-│   │   └── useKeyboard.jsx # Обработка клавиатурных событий
-│   ├── utils/              # Утилиты
-│   │   ├── keyboardUtils.js # Маппинг клавиш на ноты
-│   │   └── synthUtils.js   # Утилиты для Tone.js
-│   ├── config/             # Конфигурация
-│   │   ├── synthConfiguration.js # Настройки синтезатора
-│   │   └── synthPresets.js # Предустановленные звуки
-│   └── styles/             # Стили и темы
-├── public/                 # Статические файлы
-└── package.json           # Зависимости и скрипты
+tone-react-synth/
+├── backend/                    # Django бэкенд
+│   ├── presets/               # Приложение для управления пресетами
+│   │   ├── migrations/        # Миграции базы данных
+│   │   ├── models.py          # Модели Django (Preset)
+│   │   ├── views.py           # API эндпоинты
+│   │   ├── serializers.py     # Django REST Framework сериализаторы
+│   │   └── urls.py            # Маршруты для API пресетов
+│   ├── synth_backend/         # Основной проект Django
+│   │   ├── settings.py        # Настройки Django
+│   │   ├── urls.py            # Корневые маршруты
+│   │   └── wsgi.py            # WSGI конфигурация
+│   └── manage.py              # Django CLI утилита
+├── frontend/                  # React фронтенд
+│   ├── dist/                  # Собранные файлы для продакшена
+│   ├── node_modules/          # Зависимости npm
+│   ├── public/                # Статические файлы
+│   │   ├── icons/
+│   ├── src/                   # Исходный код React
+│   │   ├── components/        # React компоненты
+│   │   │   ├── Synth/         # Основной компонент синтезатора
+│   │   │   │   ├── Keyboard/  # Визуальная клавиатура
+│   │   │   │   │   ├── Key.jsx
+│   │   │   │   │   └── Keyboard.jsx
+│   │   │   │   ├── SynthControls/  # Панель управления
+│   │   │   │   │   ├── WaveformSelect/
+│   │   │   │   │   ├── PresetManager/
+│   │   │   │   │   └── SynthControls.jsx
+│   │   │   │   ├── Synth.style.js  # Стили для Synth
+│   │   │   │   └── Synth.jsx       # Главный компонент
+│   │   │   └── Shared/        # Общие компоненты
+│   │   ├── hooks/             # Кастомные React хуки
+│   │   │   ├── useSynth.jsx   # Основная логика синтезатора (Tone.js)
+│   │   │   ├── useActiveNotes.jsx # Управление активными нотами
+│   │   │   └── useKeyboard.jsx # Обработка клавиатурных событий
+│   │   ├── utils/             # Утилиты и вспомогательные функции
+│   │   │   ├── keyboardUtils.js # Маппинг клавиш на ноты
+│   │   │   ├── synthUtils.js  # Утилиты для работы с Tone.js
+│   │   │   ├── volumeUtils.js # Конвертация dB в проценты
+│   │   ├── config/            # Конфигурация приложения
+│   │   │   ├── synthConfiguration.js # Константы синтезатора
+│   │   │   └── synthPresets.js # Предустановленные пресеты
+│   │   ├── reducers/          # Reducers для управления состоянием
+│   │   │   └── activeNotesReducer.js # Reducer для активных нот
+│   │   ├── App.jsx            # Корневой компонент приложения
+│   │   ├── main.jsx           # Точка входа (рендерит App)
+│   │   └── App.css            # Стили приложения
 ```
 
 ## Технологии
